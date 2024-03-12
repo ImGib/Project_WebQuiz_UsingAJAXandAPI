@@ -7,5 +7,6 @@
         public string? Description { get; set; }
         public int Categoryno { get; set; }
         public bool? Status { get; set; }
+        public string? Image { get; set; }
     }
 }

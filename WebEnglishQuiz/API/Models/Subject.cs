@@ -16,6 +16,7 @@ namespace API.Models
         public string? Description { get; set; }
         public int Categoryno { get; set; }
         public bool? Status { get; set; }
+        public string? Image { get; set; }
 
         public virtual Category CategorynoNavigation { get; set; } = null!;
         public virtual ICollection<Question> Questions { get; set; }

@@ -23,15 +23,6 @@ namespace API.Models
         public virtual DbSet<Subject> Subjects { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-                optionsBuilder.UseSqlServer(config.GetConnectionString("SqlConnection"));
-            }
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Answer>(entity =>
@@ -142,6 +133,8 @@ namespace API.Models
                 entity.Property(e => e.Categoryno).HasColumnName("CATEGORYNO");
 
                 entity.Property(e => e.Description).HasColumnName("DESCRIPTION");
+
+                entity.Property(e => e.Image).HasColumnName("IMAGE");
 
                 entity.Property(e => e.Status)
                     .IsRequired()

@@ -1,7 +1,6 @@
 ﻿using API.Common.DTOs.SubjectDTO;
 using API.Models;
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static API.Common.Utility;
@@ -9,126 +8,150 @@ using static API.Common.Variables;
 
 namespace API.Controllers
 {
-	[Route("api/[controller]")]
-	[ApiController]
-	public class SubjectsController : ControllerBase
-	{
-		private readonly QuizAPIContext _context;
-		private readonly IMapper _mapper;
-		public SubjectsController(QuizAPIContext context, IMapper mapper)
-		{
-			_context = context;
-			_mapper = mapper;
-		}
+    [Route("api/[controller]")]
+    [ApiController]
+    public class SubjectsController : ControllerBase
+    {
+        private readonly QuizAPIContext _context;
+        private readonly IMapper _mapper;
+        public SubjectsController(QuizAPIContext context, IMapper mapper)
+        {
+            _context = context;
+            _mapper = mapper;
+        }
 
-		// GET: api/Subjects
-		[HttpGet]
-		public async Task<ActionResult<IEnumerable<SubjectResponse>>> GetSubjects()
-		{
-			if (_context.Subjects == null)
-			{
-				return NotFound();
-			}
-			List<Subject> list = await _context.Subjects.Include(p => p.CategorynoNavigation).ToListAsync();
-			return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<List<SubjectResponse>>(list)));
-		}
+        // GET: api/Subjects
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<SubjectResponse>>> GetSubjects()
+        {
+            if (_context.Subjects == null)
+            {
+                return NotFound();
+            }
+            List<Subject> list = await _context.Subjects.Include(p => p.CategorynoNavigation).ToListAsync();
+            return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<List<SubjectResponse>>(list)));
+        }
 
-		[HttpGet("Public")]
-		public async Task<ActionResult<IEnumerable<SubjectResponse>>> PublicSubjects()
-		{
-			if (_context.Subjects == null)
-			{
-				return NotFound();
-			}
-			List<Subject> list = _context.Subjects.Include(p => p.CategorynoNavigation).Where(p => p.Status == true).ToList();
-			return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<List<SubjectResponse>>(list)));
-		}
+        [HttpGet("Public")]
+        public async Task<ActionResult<IEnumerable<SubjectResponse>>> PublicSubjects()
+        {
+            if (_context.Subjects == null)
+            {
+                return NotFound();
+            }
+            List<Subject> list = _context.Subjects.Include(p => p.CategorynoNavigation).Where(p => p.Status == true).ToList();
+            return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<List<SubjectResponse>>(list)));
+        }
 
-		// GET: api/Subjects/5
-		[HttpGet("{subjectno}")]
-		public async Task<ActionResult<Subject>> GetSubject(int subjectno)
-		{
-			if (_context.Subjects == null)
-			{
-				return Ok(new ResponseStatus(message: ResponseError));
-			}
-			var subject = await _context.Subjects.Include(p => p.CategorynoNavigation).SingleOrDefaultAsync(p => p.Subjectno == subjectno && p.Status == true);
+        // GET: api/Subjects/5
+        [HttpGet("{subjectno}")]
+        public async Task<ActionResult<Subject>> GetSubject(int subjectno)
+        {
+            if (_context.Subjects == null)
+            {
+                return Ok(new ResponseStatus(message: ResponseError));
+            }
+            var subject = await _context.Subjects.Include(p => p.CategorynoNavigation).SingleOrDefaultAsync(p => p.Subjectno == subjectno && p.Status == true);
 
-			if (subject == null)
-			{
-				return Ok(new ResponseStatus(message: ResponseError));
-			}
+            if (subject == null)
+            {
+                return Ok(new ResponseStatus(message: ResponseError));
+            }
 
-			return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<SubjectResponse>(subject)));
-		}
+            return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<SubjectResponse>(subject)));
+        }
 
-		// PUT: api/Subjects/5
-		[HttpPut("{id}")]
-		//[Authorize(Roles = "Admin")]
-		public async Task<IActionResult> PutSubject(int id, SubjectRequest subject)
-		{
-			Subject? data = await _context.Subjects.Include(p => p.CategorynoNavigation).SingleOrDefaultAsync(p => p.Subjectno == id);
+        // PUT: api/Subjects/5
+        [HttpPut("{id}")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> PutSubject(int id, SubjectRequest subject)
+        {
+            Subject? data = await _context.Subjects.Include(p => p.CategorynoNavigation).SingleOrDefaultAsync(p => p.Subjectno == id);
 
-			if (data == null)
-			{
-				return Ok(new ResponseStatus(message: ResponseError));
-			}
+            if (data == null)
+            {
+                return Ok(new ResponseStatus(message: ResponseError));
+            }
 
-			data.Title = subject.Title;
-			data.Description = subject.Description;
-			data.Categoryno = subject.Categoryno;
+            data.Title = subject.Title;
+            data.Description = subject.Description;
+            data.Categoryno = subject.Categoryno;
 
-			try
-			{
-				await _context.SaveChangesAsync();
-			}
-			catch (DbUpdateConcurrencyException)
-			{
-				return Ok(new ResponseStatus(message: ResponseError));
-			}
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Ok(new ResponseStatus(message: ResponseError));
+            }
 
-			return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<SubjectResponse>(data)));
-		}
+            return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<SubjectResponse>(data)));
+        }
+        [HttpPut("updateStatus/{id}")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateStatus(int id)
+        {
+            Subject? data = await _context.Subjects.Include(p => p.CategorynoNavigation).SingleOrDefaultAsync(p => p.Subjectno == id);
 
-		// POST: api/Subjects
-		[HttpPost]
-		//[Authorize(Roles = "Admin")]
-		public async Task<ActionResult<SubjectResponse>> PostSubject(SubjectRequest subject)
-		{
-			if (_context.Subjects == null)
-			{
-				return Problem("Entity set 'QuizAPIContext.Subjects'  is null.");
-			}
-			_context.Subjects.Add(_mapper.Map<Subject>(subject));
-			await _context.SaveChangesAsync();
+            if (data == null)
+            {
+                return Ok(new ResponseStatus(message: ResponseError));
+            }
 
-			return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<SubjectResponse>(subject)));
-		}
+            data.Status = !data.Status;
 
-		// DELETE: api/Subjects/5
-		[HttpDelete("{id}")]
-		//[Authorize(Roles = "Admin")]
-		public async Task<IActionResult> DeleteSubject(int id)
-		{
-			if (_context.Subjects == null)
-			{
-				return NotFound();
-			}
-			var subject = await _context.Subjects.FindAsync(id);
-			if (subject == null)
-			{
-				return NotFound();
-			}
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Ok(new ResponseStatus(message: ResponseError));
+            }
 
-			_context.Subjects.Remove(subject);
-			await _context.SaveChangesAsync();
+            return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<SubjectResponse>(data)));
+        }
 
-			return NoContent();
-		}
+        // POST: api/Subjects
+        [HttpPost]
+        //[Authorize(Roles = "Admin")]
+        public async Task<ActionResult<SubjectResponse>> PostSubject(SubjectRequest subject)
+        {
+            if (_context.Subjects == null)
+            {
+                return Problem("Entity set 'QuizAPIContext.Subjects'  is null.");
+            }
+            _context.Subjects.Add(_mapper.Map<Subject>(subject));
+            await _context.SaveChangesAsync();
 
-		private bool SubjectExists(int id)
-		{
-			return (_context.Subjects?.Any(e => e.Subjectno == id)).GetValueOrDefault();
-		}
-	}
+            return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<SubjectResponse>(subject)));
+        }
+
+        // DELETE: api/Subjects/5
+        [HttpDelete("{id}")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteSubject(int id)
+        {
+            if (_context.Subjects == null)
+            {
+                return NotFound();
+            }
+            var subject = await _context.Subjects.FindAsync(id);
+            if (subject == null)
+            {
+                return NotFound();
+            }
+
+            _context.Subjects.Remove(subject);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool SubjectExists(int id)
+        {
+            return (_context.Subjects?.Any(e => e.Subjectno == id)).GetValueOrDefault();
+        }
+    }
 }
