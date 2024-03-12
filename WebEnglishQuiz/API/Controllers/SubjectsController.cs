@@ -76,6 +76,7 @@ namespace API.Controllers
             data.Title = subject.Title;
             data.Description = subject.Description;
             data.Categoryno = subject.Categoryno;
+            data.Image = subject.Image;
 
             try
             {

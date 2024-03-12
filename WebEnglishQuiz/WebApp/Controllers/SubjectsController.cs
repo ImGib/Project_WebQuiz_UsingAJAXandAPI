@@ -8,5 +8,13 @@ namespace WebApp.Controllers
         {
             return View();
         }
+        public IActionResult CreateSubject()
+        {
+            return View();
+        }
+        public IActionResult UpdateSubject()
+        {
+            return View();
+        }
     }
 }

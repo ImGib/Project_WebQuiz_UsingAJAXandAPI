@@ -12,6 +12,7 @@
             Admin,
             NormalUser
         }
+        public static int numberQuestion = 4;
         public static string Admin = "Admin";
         public static string NormalUser = "NormalUser";
         public static string ResponseOk = "OK";

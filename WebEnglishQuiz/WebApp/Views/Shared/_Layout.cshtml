@@ -34,8 +34,11 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Subjects" asp-action="Index">Subjects</a>
                             </li>
+                        }
+                        else if (User.Claims.SingleOrDefault(c => c.Type == "Role")?.Value == "NormalUser")
+                        {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/Products/Index">Products</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Exam" asp-action="Index">Exam</a>
                             </li>
                         }
                     </ul>
@@ -45,10 +48,7 @@
                     {
                         <ul class="navbar-nav flex-grow-1">
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="">Profile</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="">My Order</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Profile" asp-action="Index">Profile</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Logout" asp-action="Index">Log Out</a>

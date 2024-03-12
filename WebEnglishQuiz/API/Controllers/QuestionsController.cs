@@ -4,6 +4,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using static API.Common.Utility;
 using static API.Common.Variables;
 
@@ -44,8 +45,36 @@ namespace API.Controllers
 			List<Question> list = await _context.Questions.Include(p => p.Answers).Where(p => p.Status == true).ToListAsync();
 			return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<List<QuestionResponse>>(list)));
 		}
-		// GET: api/Questions/5
-		[HttpGet("{id}")]
+        [HttpGet("CreateExam")]
+        public async Task<ActionResult<IEnumerable<QuestionResponse>>> CreateExam(int subjectid)
+        {
+            if (_context.Questions == null || _context.Subjects == null)
+            {
+                return Ok(new ResponseStatus(message: ResponseError));
+            }
+
+			//get list subject's questions
+			List<Question> dataList = await _context.Questions.Include(p=>p.Answers).Where(p => p.Subjectno ==  subjectid).ToListAsync();
+
+            //get random 10 questions
+            Random random = new Random();
+			Question temp;
+            // Fisher-Yates shuffle algorithm
+            for (int i = dataList.Count - 1; i > 0; i--)
+            {
+                int j = random.Next(i + 1);
+                temp = dataList[i];
+                dataList[i] = dataList[j];
+                dataList[j] = temp;
+            }
+
+            List<Question> randomSublist = dataList.GetRange(0, numberQuestion);
+            //return data
+
+            return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<List<QuestionResponse>>(randomSublist)));
+        }
+        // GET: api/Questions/5
+        [HttpGet("{id}")]
 		public async Task<ActionResult<QuestionResponse>> GetQuestion(int id)
 		{
 			if (_context.Questions == null)

@@ -24,7 +24,7 @@
     <div class="row text-center text-white mb-5">
         <div class="col-lg-7 mx-auto">
             <h1 class="display-4">Subject List</h1>
-            <p class="lead mb-0">Create A New Subjects Here</p>
+            <p class="lead mb-0" onclick="GoCreate()">Create A New Subjects Here</p>
         </div>
     </div>
     <!-- End -->
@@ -59,7 +59,7 @@
                                 '<li class="list-group-item">'
                             + '    <div class="media align-items-lg-center flex-column flex-lg-row p-3">'
                             + '        <div class="media-body order-2 order-lg-1">'
-                            + '            <h5 class="mt-0 font-weight-bold mb-2">' + sub.title + '</h5>'
+                            + '            <h5 class="mt-0 font-weight-bold mb-2" onclick=UpdateDetails(' + sub.subjectno + ')>' + sub.title + '</h5>'
                             + '            <p class="font-italic text-muted mb-0 small">' + sub.description + '</p>'
                             + '            <div class="d-flex align-items-center justify-content-between mt-1">'
                             + '                <h6 class="font-weight-bold my-2">' + sub.categorynoNavigation.title + '</h6>'
@@ -91,6 +91,9 @@
             return '<p class="list-inline-item m-0" style="color: red;" onclick=UpdateStatus(' + id + ')> UnPublic </p>';
         }
     }
+    function GoCreate() {
+        window.location.href = "Subjects/CreateSubject";
+    }
     function UpdateStatus(id){
         $.ajax({
             url: 'http://localhost:5020/api/Subjects/updateStatus/' + id,
@@ -106,5 +109,8 @@
                 console.log(err.message);
             }
         })
+    }
+    function UpdateDetails(id){
+        window.location.href = "Subjects/UpdateSubject?id="+id;
     }
 </script>

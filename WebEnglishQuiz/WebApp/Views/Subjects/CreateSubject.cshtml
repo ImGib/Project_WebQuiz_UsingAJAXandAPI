@@ -1,0 +1,151 @@
+﻿<style>
+    body {
+        background: #00b09b;
+        background: -webkit-linear-gradient(to right, #00b09b, #96c93d);
+        background: linear-gradient(to right, #00b09b, #96c93d);
+        min-height: 100vh;
+    }
+
+    .text-gray {
+        color: #aaa;
+    }
+    /* Styles for the form container */
+    .form-container {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+        /* Styles for form fields */
+        .form-container input[type="text"],
+        .form-container textarea,
+        .form-container select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        /* Styles for form labels */
+        .form-container label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+            /* Styles for radio button labels */
+            .form-container label.radio {
+                margin-right: 10px;
+            }
+
+        /* Styles for the submit button */
+        .form-container input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+            /* Styles for the submit button on hover */
+            .form-container input[type="submit"]:hover {
+                background-color: #45a049;
+            }
+</style>
+<div class="container py-5">
+
+    <!-- For demo purpose -->
+    <div class="row text-center text-white mb-5">
+        <div class="col-lg-7 mx-auto">
+            <h1 class="display-4">Create New Subject</h1>
+            <p class="lead mb-0" onclick="GoBackSubjectList()">Subject List</p>
+        </div>
+    </div>
+    <!-- End -->
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="form-container">
+                <form>
+                    <label for="name">Title:</label>
+                    <input type="text" name="title" id="title"><br><br>
+
+                    <label for="country">Category: </label>
+                    <select name="category" id="category">
+                    </select><br><br>
+
+                    <label for="description">Description:</label><br>
+                    <textarea name="description" id="description" cols="30" rows="4"></textarea><br><br>
+
+                    <label for="name">Image:</label>
+                    <input type="text" name="title" id="image"><br><br>
+
+                    <input type="submit" value="Submit" onclick="CreateSubject()">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function getCategory(){
+        $.ajax({
+            url: 'http://localhost:5020/api/Categories/Public',
+            method: 'GET',
+            contentType: 'application/json',
+            success: response => { 
+                if (response.message = "OK") {
+                    console.log(response.data);
+                    const list = document.querySelector("#category");
+                    list.innerHTML = "";
+                    response.data.forEach(cate => {
+                        var opt = '<option value="' + cate.categoryno + '" > ' + cate.title + ' </option>';
+                        list.innerHTML += opt;
+                    });
+                }
+            },
+            error: err => {
+                console.log(err.message);
+            }
+        })
+    };
+
+    getCategory();
+
+    function GoBackSubjectList(){
+        window.history.back();
+    }
+
+    function CreateSubject(){
+        event.preventDefault();
+
+        var formdata = {
+            title: document.getElementById("title").value,
+            description: document.getElementById("description").value,
+            categoryno: document.getElementById("category").value,
+            image: document.getElementById("image").value
+        }
+
+        console.log(formdata);
+
+        $.ajax({
+            url: 'http://localhost:5020/api/Subjects',
+            method: "POST",
+            contentType: 'application/json',
+            data: JSON.stringify(formdata),
+            success: response => {
+                if(response.message == "OK"){
+                    GoBackSubjectList();
+                }
+            },
+            error: err => {
+                alert("Some Error has been occur");
+            }
+        })
+    }
+</script>
