@@ -1,0 +1,101 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<header>
+    <style>
+        body {
+            background: #00b09b;
+            background: -webkit-linear-gradient(to right, #00b09b, #96c93d);
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            min-height: 100vh;
+        }
+
+        .text-gray {
+            color: #aaa;
+        }
+    </style>
+</header>
+
+<div class="container py-5">
+
+    <!-- For demo purpose -->
+    <div class="row text-center text-white mb-5">
+        <div class="col-lg-7 mx-auto">
+            <h1 class="display-4">Subject List</h1>
+            <p class="lead mb-0">Create A New Subjects Here</p>
+        </div>
+    </div>
+    <!-- End -->
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+
+            <!-- List group-->
+            <ul class="list-group shadow" id="ListSubject">
+                <!-- list group item-->
+                <li class="list-group-item">
+                    <!-- Custom content-->
+                    <div class="media align-items-lg-center flex-column flex-lg-row p-3">
+                        <div class="media-body order-2 order-lg-1">
+                            <h5 class="mt-0 font-weight-bold mb-2">Awesome product</h5>
+                            <p class="font-italic text-muted mb-0 small">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Suscipit fuga autem maiores necessitatibus.</p>
+                            <div class="d-flex align-items-center justify-content-between mt-1">
+                                <h6 class="font-weight-bold my-2">$120.00</h6>
+                                <ul class="list-inline small">
+                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
+                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
+                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
+                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
+                                    <li class="list-inline-item m-0"><i class="fa fa-star-o text-gray"></i></li>
+                                </ul>
+                            </div>
+                        </div><img src="https://bootstrapious.com/i/snippets/sn-cards/shoes-1_gthops.jpg" alt="Generic placeholder image" width="200" class="ml-lg-5 order-1 order-lg-2">
+                    </div>
+                    <!-- End -->
+                </li>
+                <!-- End -->
+            </ul>
+            <!-- End -->
+        </div>
+    </div>
+</div>
+
+<script>
+    function GetAllSubject(){
+        $.ajax({
+            url: 'http://localhost:5020/api/Subjects',
+            method:'GET',
+            contentType: 'application/json',
+            success: response => {
+                if (response.message == "OK") {
+                    console.log(response.data);
+
+                    const list = document.querySelector("#ListSubject");
+                    list.innerHTML = "";
+                    response.data.forEach(sub => {
+                        var item =
+                            + '<li class="list-group-item">'
+                            + '    <div class="media align-items-lg-center flex-column flex-lg-row p-3">'
+                            + '        <div class="media-body order-2 order-lg-1">'
+                            + '            <h5 class="mt-0 font-weight-bold mb-2">Awesome product</h5>'
+                            + '            <p class="font-italic text-muted mb-0 small">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Suscipit fuga autem maiores necessitatibus.</p>'
+                            + '            <div class="d-flex align-items-center justify-content-between mt-1">'
+                            + '                <h6 class="font-weight-bold my-2">$120.00</h6>'
+                            + '            </div>'
+                            + '        </div><img src="https://bootstrapious.com/i/snippets/sn-cards/shoes-1_gthops.jpg" alt="Generic placeholder image" width="200" class="ml-lg-5 order-1 order-lg-2">'
+                            + '    </div>'
+                            + '</li>';
+                        list.innerHTML += item;
+                    });
+                };
+            },
+            error: error => {
+                console.log(error.message);
+            }
+        })
+    };
+
+    GetAllSubject();
+</script>
