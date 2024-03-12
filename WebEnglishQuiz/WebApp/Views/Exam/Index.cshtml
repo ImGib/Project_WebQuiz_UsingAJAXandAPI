@@ -94,7 +94,7 @@ For more information on enabling MVC for empty projects, visit https://go.micros
                                 <section class="rnt9ili cdm2lgu t1nasyf8" style="--t1nasyf8-2:1rem;--t1nasyf8-4:1rem;--t1nasyf8-12:2rem">
                                     <section data-testid="practice_test_icon" class="pf4awaf"></section>
                                     <h3 class="h9lvpq">Well Done! Are you ready to submit this Examination?</h3>
-                                    <button type="button" aria-label="Gửi bài kiểm tra" class="AssemblyButtonBase AssemblyPrimaryButton--default AssemblyButtonBase--xlarge AssemblyButtonBase--padding"><span>Submit Examination</span></button>
+                                    <button onclick="submitexam()" type="button" aria-label="Gửi bài kiểm tra" class="AssemblyButtonBase AssemblyPrimaryButton--default AssemblyButtonBase--xlarge AssemblyButtonBase--padding"><span>Submit Examination</span></button>
                                 </section>
                                 <section class="cdm2lgu t1nasyf8" style="--t1nasyf8-2:1rem;--t1nasyf8-4:1rem;--t1nasyf8-12:2rem"></section>
                             </div>
@@ -108,6 +108,7 @@ For more information on enabling MVC for empty projects, visit https://go.micros
 
 <script>
     function LoadQuestion() {
+        localStorage.clear();
         const urlParams = new URLSearchParams(window.location.search);
         const id = '1';
         // const id = urlParams.get("id");
@@ -173,9 +174,13 @@ For more information on enabling MVC for empty projects, visit https://go.micros
                                 + '               <div aria-hidden="true" class="m1crz3gf" data-testid="multiple-choice-answer-label">Choose The Correct Answer</div>'
                                 + '            </section>'
                                 + '            <div class="ajefojz" data-testid="MCQ Answers">';
+
+                        var listans = [];
                         data.answers.forEach(ans => {
+                            // swjz05g
+                            listans.push(ans.answerno);
                             sec +=
-                                '               <section class="w1uwrq7e" tabindex="0">'
+                                '               <section class="w1uwrq7e " tabindex="0" id="' + data.questionno +'ans'+ ans.answerno + '" onclick=selectAns(' + data.questionno +','+ ans.answerno + ')>'
                                 + '                  <div></div>'
                                 + '                  <div aria-selected="false" class="t1d08860" data-testid="option-1">'
                                 + '                     <div class="c1sj1twu">'
@@ -184,6 +189,8 @@ For more information on enabling MVC for empty projects, visit https://go.micros
                                 + '                  </div>'
                                 + '               </section>'
                             });
+                        //add list all ans for a ques
+                        localStorage.setItem('listAns' + data.questionno, listans);
                             sec +=
                                 '            </div>'
                                 + '         </div>'
@@ -200,6 +207,46 @@ For more information on enabling MVC for empty projects, visit https://go.micros
     LoadQuestion();
 
     function QuitExam() {
+        localStorage.clear();
         window.history.back();
+    }
+
+    function selectAns(quesno, ansno){
+        //answer for each question
+        var ans = localStorage.getItem('listAns' + quesno).split(",");
+        //all selected answer
+        var rs = localStorage.getItem("ResultAns");
+
+        var arr = [];
+
+        if (rs !== null) {
+            arr = rs.split(",");
+        }
+
+        //remove animation and remove answer
+        ans.forEach(item => {
+            //remove animation
+            var element = document.getElementById(quesno + 'ans' + item);
+            element.classList.remove("swjz05g");
+
+            //remove answer
+            if (arr !== null) {
+                arr = arr.filter(function (items) {
+                    return items !== item;
+                });
+            }
+        });
+
+        //update animation for selected answer
+        var element = document.getElementById(quesno + 'ans' + ansno);
+        element.classList.add("swjz05g");
+
+        arr.push(ansno);
+
+        localStorage.setItem("ResultAns", arr);
+    }
+
+    function submitexam(){
+
     }
 </script>
