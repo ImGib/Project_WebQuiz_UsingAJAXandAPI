@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
@@ -52,6 +53,7 @@ namespace API.Controllers
         // PUT: api/Histories/5
         
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutHistory(int id, History history)
         {
             if (id != history.Htrno)
@@ -83,6 +85,7 @@ namespace API.Controllers
         // POST: api/Histories
         
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<History>> PostHistory(History history)
         {
           if (_context.Histories == null)
@@ -111,6 +114,7 @@ namespace API.Controllers
 
         // DELETE: api/Histories/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteHistory(int id)
         {
             if (_context.Histories == null)

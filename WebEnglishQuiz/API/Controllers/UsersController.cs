@@ -1,10 +1,15 @@
 ﻿using API.Common;
 using API.Common.DTOs.UserDTO;
+using API.JWTAuth;
 using API.Models;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static API.Common.Variables;
+using static API.JWTAuth.JwtAuthConfig;
 
 namespace API.Controllers
 {
@@ -14,15 +19,17 @@ namespace API.Controllers
     {
         private readonly QuizAPIContext _context;
         private readonly IMapper _mapper;
-
-        public UsersController(QuizAPIContext context, IMapper mapper)
+        private readonly IConfiguration _config;
+        public UsersController(QuizAPIContext context, IMapper mapper, IConfiguration configuration)
         {
             _context = context;
             _mapper = mapper;
+            _config = configuration;
         }
 
         // GET: api/Users
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<UserDisplay>>> GetUsers()
         {
             if (_context.Users == null)
@@ -49,20 +56,24 @@ namespace API.Controllers
             }
             return Ok(new Utility.ResponseStatus(message: ResponseOk, data: _mapper.Map<UserDisplay>(user)));
         }
-        [HttpGet("login")]
+        [HttpPost("login")]
         public async Task<ActionResult<UserDisplay>> Login(UserLogin data)
         {
             User? user = await _context.Users.SingleOrDefaultAsync(p => p.Username.ToLower().Trim().Equals(data.Username.ToLower().Trim())
-                                                                    && p.Password.ToLower().Trim().Equals(data.Password.ToLower().Trim()));
+                                                                    && p.Password.ToLower().Trim().Equals(data.Password.ToLower().Trim())
+                                                                    && p.Status == true); //Account enable
             if (user == null)
             {
-                return NotFound(LoginFail);
+                return Ok(new Utility.ResponseStatus(message: LoginFail));
             }
-            return Ok(new Utility.ResponseStatus(message: LoginOk, data: _mapper.Map<UserDisplay>(user)));
+
+            JwtResponse token = CreateToken(_config, user);
+            return Ok(new Utility.ResponseStatus(message: LoginOk, token));
         }
 
         // PUT: api/Users/5
         [HttpPut("changepassword")]
+        [Authorize]
         public async Task<IActionResult> Changepassword(UserChangepassword data)
         {
             if (!UserExists(data.UserName))
@@ -130,8 +141,16 @@ namespace API.Controllers
             return Ok(new Utility.ResponseStatus(message: ResgisterOk, data: _mapper.Map<UserDisplay>(ur)));
         }
 
+        [HttpGet("Logout/{username}")]
+        [Authorize]
+        public async Task<ActionResult<UserDisplay>> Logout(string username)
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return Ok(new Utility.ResponseStatus(message: ResponseOk));
+        }
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteUser(string id)
         {
             if (_context.Users == null)

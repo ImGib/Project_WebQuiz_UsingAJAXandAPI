@@ -1,6 +1,7 @@
 ﻿using API.Common.DTOs.AnswerDTO;
 using API.Models;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static API.Common.Utility;
@@ -53,6 +54,7 @@ namespace API.Controllers
         // PUT: api/Answers/5
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutAnswer(int id, AnswerRequestBase answer)
         {
             Answer? data = await _context.Answers.FindAsync(id);
@@ -87,6 +89,7 @@ namespace API.Controllers
         // POST: api/Answers
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Answer>> PostAnswer(AnswerRequestBase answer)
         {
             if (_context.Answers == null)
@@ -101,6 +104,7 @@ namespace API.Controllers
 
         // DELETE: api/Answers/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAnswer(int id)
         {
             if (_context.Answers == null)

@@ -1,8 +1,8 @@
 ﻿namespace API.Common
 {
-    public class Utility
+    public static class Utility
     {
-        public string NowToString()
+        public static string NowToString()
         {
             return "";
         }
@@ -20,7 +20,7 @@
                 Message = message;
             }
         }
-        public bool Compare(string a, string b)
+        public static bool Compare(string a, string b)
         {
             a = a.ToLower().Trim();
             b = b.ToLower().Trim();

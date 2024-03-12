@@ -1,6 +1,6 @@
 ﻿namespace API.Common
 {
-    public class Variables
+    public static class Variables
     {
         public enum UserStatus
         {
@@ -12,9 +12,11 @@
             Admin,
             NormalUser
         }
+        public static string Admin = "Admin";
+        public static string NormalUser = "NormalUser";
         public static string ResponseOk = "OK";
         public static string ResponseError = "Error";
-        public static string ResgisterOk = "Resgister Successfull";
+        public static string ResgisterOk = "Resgister Successfully";
         public static string ResgisterFail = "Resgister Fail";
         public static string UserExisted = "User Name Already Existed";
         public static string UserNotExisted = "User Name Not Existed";

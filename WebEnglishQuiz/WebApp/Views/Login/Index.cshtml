@@ -1,0 +1,82 @@
+﻿@{
+	Layout = null;
+}
+
+<header>
+	<link rel='stylesheet' href="~/css/Login/style.css"/>
+	<link rel='stylesheet' href="~/lib/Login/Login.js"/>
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</header>
+
+<body>
+<div class="container" id="container">
+	<div class="form-container sign-in-container">
+		<form action="#">
+			<h1>Sign in</h1>
+			<input type="text" placeholder="Username" id="username"/>
+			<input type="password" placeholder="Password" id="password"/>
+			<a href="#">Forgot your password?</a>
+			<button type="button" onclick="SignIn()">Sign In</button>
+		</form>
+	</div>
+	<div class="overlay-container">
+		<div class="overlay">
+			<div class="overlay-panel overlay-right">
+				<h1>Hello, Friend!</h1>
+				<p>Enter your personal details and start journey with us</p>
+				<button class="ghost" id="signUp" onclick="GoSignUp()">Sign Up</button>
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+
+<script>
+	const isEmpty = str => !str.trim().length;
+	const getFormData = () => {
+		const formData = {
+			UserName: document.getElementById('username').value,
+			Password: document.getElementById('password').value
+		};
+		return formData;
+	};
+
+	function SignIn(){
+		event.preventDefault();
+
+		var name = document.getElementById('username').value;
+		if (isEmpty(name)) {
+			alert("Username is required!");
+			return;
+		}
+		var name = document.getElementById('password').value;
+		if (isEmpty(name)) {
+			alert("Password is required!");
+			return;
+		}
+		var formdata = getFormData();
+
+		$.ajax({
+			url: 'Login/Confirm',
+			method: "POST",
+			contentType: 'application/json',
+			data: JSON.stringify(formdata),
+			success: response => {
+				if (response.message == 'Login Successfully')
+					window.location.href = '/Home'
+				else {
+					console.log("false");
+					alert(response.message);
+				}
+			},
+			error: err => {
+				alert("Your User Name Or Password might wrong")
+			}
+		});
+	}
+
+	function GoSignUp(){
+		window.location.href = '/SignUp'
+	}
+</script>
