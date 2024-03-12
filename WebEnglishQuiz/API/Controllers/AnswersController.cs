@@ -54,7 +54,7 @@ namespace API.Controllers
         // PUT: api/Answers/5
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutAnswer(int id, AnswerRequestBase answer)
         {
             Answer? data = await _context.Answers.FindAsync(id);
@@ -89,7 +89,7 @@ namespace API.Controllers
         // POST: api/Answers
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<Answer>> PostAnswer(AnswerRequestBase answer)
         {
             if (_context.Answers == null)
@@ -104,7 +104,7 @@ namespace API.Controllers
 
         // DELETE: api/Answers/5
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAnswer(int id)
         {
             if (_context.Answers == null)

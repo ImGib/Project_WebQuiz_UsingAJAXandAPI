@@ -1,235 +1,183 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Bootstrap Table with Add and Delete Row Feature</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round|Open+Sans">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+﻿<header>
+
     <style>
         body {
-            color: #404E67;
-            background: #F5F7FA;
-            font-family: 'Open Sans', sans-serif;
+            background: #edf1f5;
         }
 
-        .table-wrapper {
-            width: 700px;
-            margin: 30px auto;
-            background: #fff;
-            padding: 20px;
-            box-shadow: 0 1px 1px rgba(0,0,0,.05);
+        .card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            word-wrap: break-word;
+            background-color: #fff;
+            background-clip: border-box;
+            border: 0 solid transparent;
+            border-radius: 0;
         }
 
-        .table-title {
-            padding-bottom: 10px;
-            margin: 0 0 10px;
+        .btn-circle.btn-lg, .btn-group-lg > .btn-circle.btn {
+            width: 50px;
+            height: 50px;
+            padding: 14px 15px;
+            font-size: 18px;
+            line-height: 23px;
         }
 
-            .table-title h2 {
-                margin: 6px 0 0;
-                font-size: 22px;
-            }
+        .text-muted {
+            color: #8898aa !important;
+        }
+/* 
+        [type=button]:not(:disabled), [type=reset]:not(:disabled), [type=submit]:not(:disabled), button:not(:disabled) {
+            cursor: pointer;
+        } */
 
-            .table-title .add-new {
-                float: right;
-                height: 30px;
-                font-weight: bold;
-                font-size: 12px;
-                text-shadow: none;
-                min-width: 100px;
-                border-radius: 50px;
-                line-height: 13px;
-            }
-
-                .table-title .add-new i {
-                    margin-right: 4px;
-                }
-
-        table.table {
-            table-layout: fixed;
+        .btn-circle {
+            border-radius: 100%;
+            width: 40px;
+            height: 40px;
+            padding: 10px;
         }
 
-            table.table tr th, table.table tr td {
-                border-color: #e9e9e9;
-            }
+        .user-table tbody tr .category-select {
+            max-width: 150px;
+            border-radius: 20px;
+        }
 
-            table.table th i {
-                font-size: 13px;
-                margin: 0 5px;
-                cursor: pointer;
-            }
-
-            table.table th:last-child {
-                width: 100px;
-            }
-
-            table.table td a {
-                cursor: pointer;
-                display: inline-block;
-                margin: 0 5px;
-                min-width: 24px;
-            }
-
-                table.table td a.add {
-                    color: #27C46B;
-                }
-
-                table.table td a.edit {
-                    color: #FFC107;
-                }
-
-                table.table td a.delete {
-                    color: #E34724;
-                }
-
-            table.table td i {
-                font-size: 19px;
-            }
-
-            table.table td a.add i {
-                font-size: 24px;
-                margin-right: -1px;
-                position: relative;
-                top: 3px;
-            }
-
-            table.table .form-control {
-                height: 32px;
-                line-height: 32px;
-                box-shadow: none;
-                border-radius: 2px;
-            }
-
-                table.table .form-control.error {
-                    border-color: #f50000;
-                }
-
-            table.table td .add {
-                display: none;
-            }
     </style>
-    <script>
-        $(document).ready(function () {
-            $('[data-toggle="tooltip"]').tooltip();
-            var actions = $("table td:last-child").html();
-            // Append table with add row form on add new button click
-            $(".add-new").click(function () {
-                $(this).attr("disabled", "disabled");
-                var index = $("table tbody tr:last-child").index();
-                var row = '<tr>' +
-                    '<td><input type="text" class="form-control" name="name" id="name"></td>' +
-                    '<td><input type="text" class="form-control" name="department" id="department"></td>' +
-                    '<td><input type="text" class="form-control" name="phone" id="phone"></td>' +
-                    '<td>' + actions + '</td>' +
-                    '</tr>';
-                $("table").append(row);
-                $("table tbody tr").eq(index + 1).find(".add, .edit").toggle();
-                $('[data-toggle="tooltip"]').tooltip();
-            });
-            // Add row on add button click
-            $(document).on("click", ".add", function () {
-                var empty = false;
-                var input = $(this).parents("tr").find('input[type="text"]');
-                input.each(function () {
-                    if (!$(this).val()) {
-                        $(this).addClass("error");
-                        empty = true;
-                    } else {
-                        $(this).removeClass("error");
-                    }
-                });
-                $(this).parents("tr").find(".error").first().focus();
-                if (!empty) {
-                    input.each(function () {
-                        $(this).parent("td").html($(this).val());
-                    });
-                    $(this).parents("tr").find(".add, .edit").toggle();
-                    $(".add-new").removeAttr("disabled");
-                }
-            });
-            // Edit row on edit button click
-            $(document).on("click", ".edit", function () {
-                $(this).parents("tr").find("td:not(:last-child)").each(function () {
-                    $(this).html('<input type="text" class="form-control" value="' + $(this).text() + '">');
-                });
-                $(this).parents("tr").find(".add, .edit").toggle();
-                $(".add-new").attr("disabled", "disabled");
-            });
-            // Delete row on delete button click
-            $(document).on("click", ".delete", function () {
-                $(this).parents("tr").remove();
-                $(".add-new").removeAttr("disabled");
-            });
-        });
-    </script>
-</head>
-<body>
-    <div class="container-lg">
-        <div class="table-responsive">
-            <div class="table-wrapper">
-                <div class="table-title">
-                    <div class="row">
-                        <div class="col-sm-8"><h2>Employee <b>Details</b></h2></div>
-                        <div class="col-sm-4">
-                            <button type="button" class="btn btn-info add-new"><i class="fa fa-plus"></i> Add New</button>
-                        </div>
-                    </div>
+</header>
+
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title text-uppercase mb-0">Manage Users</h5>
                 </div>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Department</th>
-                            <th>Phone</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>John Doe</td>
-                            <td>Administration</td>
-                            <td>(171) 555-2222</td>
-                            <td>
-                                <a class="add" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
-                                <a class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>
-                                <a class="delete" title="Delete" data-toggle="tooltip"><i class="material-icons">&#xE872;</i></a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Peter Parker</td>
-                            <td>Customer Service</td>
-                            <td>(313) 555-5735</td>
-                            <td>
-                                <a class="add" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
-                                <a class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>
-                                <a class="delete" title="Delete" data-toggle="tooltip"><i class="material-icons">&#xE872;</i></a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Fran Wilson</td>
-                            <td>Human Resources</td>
-                            <td>(503) 555-9931</td>
-                            <td>
-                                <a class="add" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
-                                <a class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>
-                                <a class="delete" title="Delete" data-toggle="tooltip"><i class="material-icons">&#xE872;</i></a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table no-wrap user-table mb-0" id="UserTableData">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="border-0 text-uppercase font-medium pl-4">#</th>
+                                <th scope="col" class="border-0 text-uppercase font-medium">Name</th>
+                                <th scope="col" class="border-0 text-uppercase font-medium">PhoneNumber</th>
+                                <th scope="col" class="border-0 text-uppercase font-medium">Email</th>
+                                <th scope="col" class="border-0 text-uppercase font-medium">Status</th>
+                                <th scope="col" class="border-0 text-uppercase font-medium">User Role</th>
+                                <th scope="col" class="border-0 text-uppercase font-medium">Manage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="UsertableBody">
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</body>
-</html>
+</div>
+
+
+<script>
+    function UpdateUser(id) {
+        const role = document.getElementById('userRole' + id).value == "1" ? true : false;
+        const status = document.getElementById('userSatatus' + id).value == "1" ? true : false;
+
+        var user = {
+            username: id,
+            role: role,
+            status: status,
+        };
+        console.log(JSON.stringify(user));
+        $.ajax({
+            url: 'http://localhost:5020/api/Users/adminUpdate',
+            method: "PUT",
+            data: JSON.stringify(user),
+            contentType: 'application/json',
+            success: response => {
+                if (response.message == "OK"){
+                    alert("Update User Successfully");
+                }else {
+                    alert("Update User Fail");
+                }
+            },
+            error: error => {
+                alert("Update User Fail");
+            }
+        })
+    }
+
+    function GetAllUser(){
+        var path = "http://localhost:5020/api/Users";
+
+        $.ajax({
+            url: path,
+            method: "GET",
+            contentType: 'application/json',
+            success: response => {
+                if (response.message == "OK") {
+                    const tableBody = document.querySelector("#UserTableData tbody");
+                    tableBody.innerHTML = "";
+                    var i = 1;
+                    response.data.forEach(user => {
+                        var tr =
+                            '<tr>'
+                            + '<td class="pl-4">' + i + '</td>'
+                            + '<td><h5 class="font-medium mb-0" > ' + user.username.trim() + ' </h5>'
+                            + '<span class="text-muted" > ' + user.firstName.trim() + ' ' + user.lastName.trim() + ' </span>'
+                            + '</td>'
+                            + '<td><span class="text-muted"> ' + user.phonenumber.trim() + ' </span></td>'
+                            + '<td><span class="text-muted"> ' + user.email.trim() + ' </span></td>'
+                            + '<td>'
+                            + '<select class="form-control category-select" id="userSatatus' + user.username.trim() + '">'
+                            + getStatus(user.status)
+                            + '</select>'
+                            + '</td>'
+                            + '<td>'
+                            + '<select class="form-control category-select" id="userRole' + user.username.trim() + '">'
+                            + getRole(user.role)
+                            + '</select>'
+                            + '</td>'
+                            + '<td >'
+                            + '    <button type="submit" class="btn btn-outline-info btn-circle btn-lg btn-circle ml-2" '
+                            + '     id="updatebutton" onclick=UpdateUser("' + user.username.trim() + '")>'
+                            + '         <i class="fa fa-edit"></i> </button>'
+                            + '</td>'
+                            + '</tr>';
+                        tableBody.innerHTML += tr;
+                        i++;
+                    });
+                }
+            }
+        });
+    }
+    function getRole(role) {
+        var option = '<option value=0 ';
+        if (role == false) {
+            option += 'selected >Admin</option>'
+                + '<option value=1 >User</option>';
+        }
+        else {
+            option += ' >Admin</option>'
+                + '<option value=1 selected>User</option>';
+        }
+        return option;
+    }
+    function getStatus(status) {
+        var option = '<option value=0 ';
+        if (status == false) {
+            option += 'selected >Invalid</option>'
+                + '<option value=1 >Valid</option>';
+        }
+        else {
+            option += ' >Invalid</option>'
+                + '<option value=1 selected>Valid</option>';
+        }
+        return option;
+    }
+    GetAllUser();
+
+</script>

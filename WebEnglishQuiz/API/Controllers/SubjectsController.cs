@@ -64,7 +64,7 @@ namespace API.Controllers
 
 		// PUT: api/Subjects/5
 		[HttpPut("{id}")]
-		[Authorize(Roles = "Admin")]
+		//[Authorize(Roles = "Admin")]
 		public async Task<IActionResult> PutSubject(int id, SubjectRequest subject)
 		{
 			Subject? data = await _context.Subjects.Include(p => p.CategorynoNavigation).SingleOrDefaultAsync(p => p.Subjectno == id);
@@ -92,7 +92,7 @@ namespace API.Controllers
 
 		// POST: api/Subjects
 		[HttpPost]
-		[Authorize(Roles = "Admin")]
+		//[Authorize(Roles = "Admin")]
 		public async Task<ActionResult<SubjectResponse>> PostSubject(SubjectRequest subject)
 		{
 			if (_context.Subjects == null)
@@ -107,7 +107,7 @@ namespace API.Controllers
 
 		// DELETE: api/Subjects/5
 		[HttpDelete("{id}")]
-		[Authorize(Roles = "Admin")]
+		//[Authorize(Roles = "Admin")]
 		public async Task<IActionResult> DeleteSubject(int id)
 		{
 			if (_context.Subjects == null)

@@ -29,7 +29,7 @@ namespace API.Controllers
 
         // GET: api/Users
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<UserDisplay>>> GetUsers()
         {
             if (_context.Users == null)
@@ -37,7 +37,7 @@ namespace API.Controllers
                 return NotFound();
             }
             List<User> rs = await _context.Users.ToListAsync();
-            return _mapper.Map<List<UserDisplay>>(rs);
+            return Ok(new Utility.ResponseStatus(message: ResponseOk, data: _mapper.Map<List<UserDisplay>>(rs)));
         }
 
         // GET: api/Users/5
@@ -73,7 +73,6 @@ namespace API.Controllers
 
         // PUT: api/Users/5
         [HttpPut("changepassword")]
-        [Authorize]
         public async Task<IActionResult> Changepassword(UserChangepassword data)
         {
             if (!UserExists(data.UserName))
@@ -140,34 +139,60 @@ namespace API.Controllers
 
             return Ok(new Utility.ResponseStatus(message: ResgisterOk, data: _mapper.Map<UserDisplay>(ur)));
         }
-
-        [HttpGet("Logout/{username}")]
-        [Authorize]
-        public async Task<ActionResult<UserDisplay>> Logout(string username)
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return Ok(new Utility.ResponseStatus(message: ResponseOk));
-        }
-        // DELETE: api/Users/5
-        [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteUser(string id)
+        [HttpPut("adminUpdate")]
+        public async Task<ActionResult> AdminUpUser(UserUpdateBaseBase data)
         {
             if (_context.Users == null)
             {
-                return NotFound();
+                return Problem(ResgisterFail);
             }
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
+
+            User? user = await _context.Users.FindAsync(data.Username);
+
+            if(user == null)
             {
-                return NotFound();
+                return Ok(new Utility.ResponseStatus(message: "Update User Fail", data: _mapper.Map<UserDisplay>(data)));
             }
 
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            user.Status = data.Status;
+            user.Role = data.Role;
+            try
+            {
+                await _context.SaveChangesAsync();
+            } catch
+            {
+                return Ok(new Utility.ResponseStatus(message: ResponseError, data: _mapper.Map<UserDisplay>(data)));
+            }
 
-            return NoContent();
+            return Ok(new Utility.ResponseStatus(message: ResponseOk, data: _mapper.Map<UserDisplay>(user)));
         }
+
+        //[HttpGet("Logout/{username}")]
+        //public async Task<ActionResult<UserDisplay>> Logout(string username)
+        //{
+        //    await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        //    return Ok(new Utility.ResponseStatus(message: ResponseOk));
+        //}
+        //// DELETE: api/Users/5
+        //[HttpDelete("{id}")]
+        ////[Authorize(Roles = "Admin")]
+        //public async Task<IActionResult> DeleteUser(string id)
+        //{
+        //    if (_context.Users == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    var user = await _context.Users.FindAsync(id);
+        //    if (user == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    _context.Users.Remove(user);
+        //    await _context.SaveChangesAsync();
+
+        //    return NoContent();
+        //}
 
         private bool UserExists(string id)
         {

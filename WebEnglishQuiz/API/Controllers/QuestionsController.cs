@@ -65,7 +65,7 @@ namespace API.Controllers
 		// PUT: api/Questions/5
 
 		[HttpPut("{id}")]
-		[Authorize(Roles = "Admin")]
+		//[Authorize(Roles = "Admin")]
 		public async Task<IActionResult> PutQuestion(int id, QuestionRequestBase question)
 		{
 			Question? data = await _context.Questions.FirstOrDefaultAsync(p => p.Questionno == id);
@@ -100,7 +100,7 @@ namespace API.Controllers
 		// POST: api/Questions
 
 		[HttpPost]
-		[Authorize(Roles = "Admin")]
+		//[Authorize(Roles = "Admin")]
 		public async Task<ActionResult<Question>> PostQuestion(QuestionRequestBase question)
 		{
 			if (_context.Questions == null)
@@ -116,7 +116,7 @@ namespace API.Controllers
 
 		// DELETE: api/Questions/5
 		[HttpDelete("{id}")]
-		[Authorize(Roles = "Admin")]
+		//[Authorize(Roles = "Admin")]
 		public async Task<IActionResult> DeleteQuestion(int id)
 		{
 			if (_context.Questions == null)

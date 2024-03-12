@@ -9,6 +9,7 @@ namespace API.Common.Mapper
         public UserMapper()
         {
             CreateMap<UserRegister, User>();
+            CreateMap<UserUpdateBaseBase, User>();
             CreateMap<User, UserDisplay>();
         }
     }
