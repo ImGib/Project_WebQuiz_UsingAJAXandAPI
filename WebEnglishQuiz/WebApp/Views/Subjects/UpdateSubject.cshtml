@@ -62,7 +62,7 @@
     <div class="row text-center text-white mb-5">
         <div class="col-lg-7 mx-auto">
             <h1 class="display-4">Update Subject</h1>
-            <p class="lead mb-0" onclick="GoBackSubjectList()">Subject List</p>
+            <p class="lead mb-0" onclick="GoBackSubjectList()">Go Back Subject List</p>
         </div>
     </div>
     <!-- End -->
@@ -98,13 +98,15 @@
             method: 'GET',
             contentType: 'application/json',
             success: response => {
-                if (response.message = "OK") {
+                if (response.message == "OK") {
                     const list = document.querySelector("#category");
                     list.innerHTML = "";
                     response.data.forEach(cate => {
                         var opt = '<option value="' + cate.categoryno + '" > ' + cate.title + ' </option>';
                         list.innerHTML += opt;
                     });
+
+                    loadSubject();
                 }
             },
             error: err => {
@@ -143,7 +145,7 @@
             }
         })
     };
-    loadSubject();
+    
 
     function UpdateSubject() {
         event.preventDefault();

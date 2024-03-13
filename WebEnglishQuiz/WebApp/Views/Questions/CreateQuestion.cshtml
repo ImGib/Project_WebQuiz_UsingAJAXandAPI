@@ -1,0 +1,192 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<link rel="stylesheet" href="~/css/CreateQuestion.css"/>
+
+<form id="questionForm">
+    <h2>Create Question</h2>
+    <div>
+        <label for="categorySelect">Subject:</label>
+        <select id="categorySelect" required>
+        </select>
+    </div>
+    <div>
+        <label for="questionInput">Question:</label>
+        <input type="text" id="questionInput" required>
+    </div>
+    <div>
+        <button type="button" id="addOptionButton">Add Option</button>
+        <label>Answer:</label>
+        <div id="answerOptionsContainer">
+            <div class="optionContainer">
+                @* <input type="radio" name="answerOptions" value="Option 1"> *@
+                <input type="text" name="answerOptionsText[]" required>
+                <button class="removeOptionButton">Remove</button>
+            </div>
+        </div>
+        <label>Correct Answer Is:</label>
+        <div id="answerOptionsContainer">
+            <div class="optionContainer">
+                <input type="text" id="CorrectAns" required>
+            </div>
+        </div>
+    </div>
+    <button type="submit">Add Question</button>
+</form>
+
+<script>
+    //Load Subject
+    function LoadListSubject() {
+        var url = 'http://localhost:5020/api/Subjects/Public';
+        $.ajax({
+            url: url,
+            method: 'GET',
+            contentType: 'application/json',
+            success: response => {
+                if (response.message == "OK") {
+                    $.each(response.data, function (index, item) {
+                        $("#categorySelect").append($('<option>', {
+                            value: item.subjectno,
+                            text: item.title
+                        }));
+                    });
+                };
+            },
+            error: error => {
+                console.log(error.message);
+            }
+        })
+    };
+
+    LoadListSubject();
+    // Function to remove an option
+    function removeOption(optionDiv) {
+        optionDiv.parentNode.removeChild(optionDiv);
+    }
+
+    // Add event listeners to the existing remove option buttons
+    var removeOptionButtons = document.getElementsByClassName("removeOptionButton");
+    for (var i = 0; i < removeOptionButtons.length; i++) {
+        removeOptionButtons[i].addEventListener("click", function () {
+            removeOption(this.parentNode);
+        });
+    }
+
+    // Event listener for the add option button
+    document.getElementById("addOptionButton").addEventListener("click", function () {
+        var answerOptionsContainer = document.getElementById("answerOptionsContainer");
+
+        // Create a new div for the new option
+        var newOptionDiv = document.createElement("div");
+        newOptionDiv.className = "optionContainer";
+
+        // Create a new radio button
+        // var newOptionRadio = document.createElement("input");
+        // newOptionRadio.type = "radio";
+        // newOptionRadio.name = "answerOptions";
+        // newOptionRadio.value = "Option " + (answerOptionsContainer.children.length + 1);
+
+        // Create a new text input field
+        var newOptionText = document.createElement("input");
+        newOptionText.type = "text";
+        newOptionText.name = "answerOptionsText[]";
+        newOptionText.required = true;
+
+        // Create a new remove option button
+        var newRemoveOptionButton = document.createElement("button");
+        newRemoveOptionButton.className = "removeOptionButton";
+        newRemoveOptionButton.textContent = "Remove";
+        newRemoveOptionButton.addEventListener("click", function () {
+            removeOption(newOptionDiv);
+        });
+
+        // Append the new elements to the new option div
+        // newOptionDiv.appendChild(newOptionRadio);
+        newOptionDiv.appendChild(newOptionText);
+        newOptionDiv.appendChild(newRemoveOptionButton);
+
+        // Append the new option div to the answer options container
+        answerOptionsContainer.appendChild(newOptionDiv);
+    });
+
+    // Event listener for the Add Question button
+    document.getElementById("questionForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        //check empty
+        var optionFields = document.getElementsByName("answerOptionsText[]");
+        for (var i = 0; i < optionFields.length; i++) {
+            if (optionFields[i].value.trim() === "") {
+                event.preventDefault();
+                alert("Please fill in all option fields.");
+                return;
+            }
+        }
+
+        var inputField = document.getElementById("CorrectAns");
+        var inputValue = inputField.value.trim();
+
+        if (isInteger(inputValue)) {
+            alert("Input is an integer number.");
+            return;
+        } else {
+            alert("Input is not an integer number.");
+            return;
+        }
+
+        // insert question
+        var data = {
+            subjectno: document.getElementById("categorySelect").value,
+            description: document.getElementById("questionInput").value
+        }
+        $.ajax({
+            url: 'http://localhost:5020/api/Questions',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: res => {
+                if (res.message == 'OK') {
+                    quesno = res.data.questionno;
+
+                    var isCor = document.getElementById("CorrectAns").value;
+                    // CorrectAns
+                    console.log(optionFields);
+
+                    for (var i = 0; i < optionFields.length; i++) {
+                        var data = {
+                            questionno: quesno,
+                            iscorect: i == (isCor - 1) ? true : false,
+                            description: optionFields[i].value.trim()
+                        }
+                        console.log(data);
+                        $.ajax({
+                            url: 'http://localhost:5020/api/Answers',
+                            method: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify(data),
+                            success: res => {
+                                if (res.message == 'OK') {
+                                    console.log("OK");
+                                } else {
+                                    alert("Cannot Add answer");
+                                    return;
+                                }
+                            }
+                        })
+                    }
+
+                }
+            },
+            error: err => {
+                console.log(err);
+            }
+        });
+    });
+    
+
+    function isInteger(value) {
+        return /^\d+$/.test(value);
+    }
+</script>

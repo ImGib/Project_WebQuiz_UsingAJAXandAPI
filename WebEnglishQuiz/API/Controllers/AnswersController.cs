@@ -89,22 +89,27 @@ namespace API.Controllers
         // POST: api/Answers
 
         [HttpPost]
-        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<Answer>> PostAnswer(AnswerRequestBase answer)
         {
             if (_context.Answers == null)
             {
                 return Problem("Entity set 'QuizAPIContext.Answers'  is null.");
             }
-            _context.Answers.Add(_mapper.Map<Answer>(answer));
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Answers.Add(_mapper.Map<Answer>(answer));
+                await _context.SaveChangesAsync();
+            }
+            catch
+            {
+                return Ok(new ResponseStatus(message: ResponseError));
+            }
 
             return Ok(new ResponseStatus(message: ResponseOk));
         }
 
         // DELETE: api/Answers/5
         [HttpDelete("{id}")]
-        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAnswer(int id)
         {
             if (_context.Answers == null)

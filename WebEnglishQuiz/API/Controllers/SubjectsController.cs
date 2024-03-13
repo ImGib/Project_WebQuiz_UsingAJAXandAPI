@@ -170,7 +170,7 @@ namespace API.Controllers
             {
                 return Ok(new ResponseStatus(message: ResponseError));
             }
-            var subject = await _context.Subjects.Include(p => p.CategorynoNavigation).SingleOrDefaultAsync(p => p.Subjectno == subjectno && p.Status == true);
+            var subject = await _context.Subjects.Include(p => p.CategorynoNavigation).SingleOrDefaultAsync(p => p.Subjectno == subjectno);
 
             if (subject == null)
             {
@@ -236,16 +236,17 @@ namespace API.Controllers
         // POST: api/Subjects
         [HttpPost]
         //[Authorize(Roles = "Admin")]
-        public async Task<ActionResult<SubjectResponse>> PostSubject(SubjectRequest subject)
+        public async Task<ActionResult<int>> PostSubject(SubjectRequest subject)
         {
             if (_context.Subjects == null)
             {
                 return Problem("Entity set 'QuizAPIContext.Subjects'  is null.");
             }
-            _context.Subjects.Add(_mapper.Map<Subject>(subject));
+            Subject data = _mapper.Map<Subject>(subject);
+            _context.Subjects.Add(data);
             await _context.SaveChangesAsync();
 
-            return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<SubjectResponse>(subject)));
+            return Ok(new ResponseStatus(message: ResponseOk, data.Subjectno));
         }
 
         // DELETE: api/Subjects/5

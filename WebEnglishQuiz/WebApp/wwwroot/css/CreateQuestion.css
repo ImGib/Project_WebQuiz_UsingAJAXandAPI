@@ -1,0 +1,154 @@
+﻿/* CSS for the form layout */
+form {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input[type="text"],
+input[type="radio"],
+button {
+    margin-bottom: 10px;
+}
+
+#answerOptionsContainer {
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+.optionContainer {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+    .optionContainer input[type="radio"] {
+        margin-right: 10px;
+    }
+
+    .optionContainer input[type="text"] {
+        flex-grow: 1;
+        margin-right: 10px;
+    }
+
+    .optionContainer button {
+        background-color: #f44336;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+
+        .optionContainer button:hover {
+            background-color: #d32f2f;
+        }
+
+#addOptionButton {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+    #addOptionButton:hover {
+        background-color: #45a049;
+    }
+
+button[type="submit"] {
+    background-color: #2196f3;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+    button[type="submit"]:hover {
+        background-color: #1976d2;
+    }
+
+#questionList {
+    max-width: 400px;
+    margin: 20px auto;
+}
+
+    #questionList ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    #questionList li {
+        margin-bottom: 10px;
+        background-color: #f9f9f9;
+        padding: 10px;
+    }
+
+form {
+    border: 1px solid #ddd;
+    padding: 20px;
+}
+
+label {
+    border: none;
+}
+
+input[type="text"],
+input[type="radio"],
+button {
+    border: 1px solid #ddd;
+    padding: 5px;
+}
+
+#answerOptionsContainer {
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+.optionContainer {
+    border: none;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+}
+
+    .optionContainer:last-child {
+        border-bottom: none;
+    }
+
+    .optionContainer input[type="radio"],
+    .optionContainer input[type="text"],
+    .optionContainer button {
+        border: 1px solid #ddd;
+        padding: 5px;
+    }
+
+    .optionContainer button {
+        background-color: #f44336;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+
+        .optionContainer button:hover {
+            background-color: #d32f2f;
+        }
+
+#addOptionButton,
+button[type="submit"] {
+    border: none;
+    padding: 10px 20px;
+}
+
+select {
+    border: 1px solid #ddd;
+    padding: 5px;
+}
