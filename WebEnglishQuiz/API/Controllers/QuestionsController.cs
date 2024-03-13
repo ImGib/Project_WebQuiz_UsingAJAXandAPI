@@ -56,6 +56,11 @@ namespace API.Controllers
 			//get list subject's questions
 			List<Question> dataList = await _context.Questions.Include(p=>p.Answers).Where(p => p.Subjectno ==  subjectid).ToListAsync();
 
+			if(dataList == null || dataList.Count <=0)
+			{
+                return Ok(new ResponseStatus(message: ResponseError));
+            }
+
             //get random 10 questions
             Random random = new Random();
 			Question temp;

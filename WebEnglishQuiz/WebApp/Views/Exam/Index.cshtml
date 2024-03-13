@@ -163,15 +163,17 @@ For more information on enabling MVC for empty projects, visit https://go.micros
 </body>
 
 <script>
+    var goHome = 0;
+
     function LoadQuestion() {
         localStorage.clear();
         const urlParams = new URLSearchParams(window.location.search);
-        const id = '1';
-        // const id = urlParams.get("id");
+        const id = urlParams.get("id");
 
         localStorage.setItem("SubjectNO", id);
         localStorage.setItem("User", '@User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value');
 
+        //get subject infor
         $.ajax({
             url: 'http://localhost:5020/api/Subjects/' + id,
             method: 'GET',
@@ -191,12 +193,14 @@ For more information on enabling MVC for empty projects, visit https://go.micros
             }
         });
 
+        //load question
         $.ajax({
             url: 'http://localhost:5020/api/Questions/CreateExam?subjectid=' + id,
             method:'GET',
             contentType:'application/json',
             success: res => {
-                if (res.message = 'OK') {
+                console.log(res.message);
+                if (res.message == 'OK') {
                     console.log(res.data);
 
                     const list = document.querySelector("#QuestionExam");
@@ -204,42 +208,42 @@ For more information on enabling MVC for empty projects, visit https://go.micros
 
                     res.data.forEach(data => {
                         var sec =
-                                '<div aria-label="question" role="listitem" class="qq5bf7c" style="--qq5bf7c-0:2rem;--qq5bf7c-2:2rem">'
-                                + '   <div id="mcq-0" tabindex="-1" class="q1sjw0yf">'
-                                + '      <article aria-live="polite" class="sdz9qxu svwhkoh" style="--svwhkoh-3:0;--svwhkoh-6:1.5rem 2rem 1.5rem;--svwhkoh-13:0.5rem">'
-                                + '         <div class="a1bncmms">'
-                                + '            <div class="wlbcmo g8d16b6">'
-                                + '               <div class="wlbcmo hn7llme">'
-                                + '                  <div class="wlbcmo l3h11jy">'
-                                + '                     <section class="lwajxlv">Question</section>'
-                                + '                  </div>'
-                                + '                  <div class="wlbcmo c8ck6sr"></div>'
-                                + '                  <div class="wlbcmo rpq3rlv">'
-                                + '                     <div class="r1i8yi5w"></div>'
-                                + '                  </div>'
-                                + '               </div>'
-                                + '            </div>'
-                                + '            <div class="t4j019x" data-testid="Question Text" style="--t4j019x-0:auto">'
-                                + '               <div class="t1gujtze c1sj1twu">'
-                                + '                  <div aria-label="A web page and its content exist as a single file" class="FormattedText notranslate FormattedTextWithImage-wrapper lang-en">'
-                                + '                     <div style="display:inline-block">' + data.description + '</div>'
-                                + '                  </div>'
-                                + '               </div>'
-                                + '            </div>'
-                                + '            <div class="hideBelow--s"></div>'
-                                + '         </div>'
-                                + '         <div class="ag1fjc">'
-                                + '            <section aria-label="Choose The Correct Answer" class="l16m64a6">'
-                                + '               <div aria-hidden="true" class="m1crz3gf" data-testid="multiple-choice-answer-label">Choose The Correct Answer</div>'
-                                + '            </section>'
-                                + '            <div class="ajefojz" data-testid="MCQ Answers">';
+                            '<div aria-label="question" role="listitem" class="qq5bf7c" style="--qq5bf7c-0:2rem;--qq5bf7c-2:2rem">'
+                            + '   <div id="mcq-0" tabindex="-1" class="q1sjw0yf">'
+                            + '      <article aria-live="polite" class="sdz9qxu svwhkoh" style="--svwhkoh-3:0;--svwhkoh-6:1.5rem 2rem 1.5rem;--svwhkoh-13:0.5rem">'
+                            + '         <div class="a1bncmms">'
+                            + '            <div class="wlbcmo g8d16b6">'
+                            + '               <div class="wlbcmo hn7llme">'
+                            + '                  <div class="wlbcmo l3h11jy">'
+                            + '                     <section class="lwajxlv">Question</section>'
+                            + '                  </div>'
+                            + '                  <div class="wlbcmo c8ck6sr"></div>'
+                            + '                  <div class="wlbcmo rpq3rlv">'
+                            + '                     <div class="r1i8yi5w"></div>'
+                            + '                  </div>'
+                            + '               </div>'
+                            + '            </div>'
+                            + '            <div class="t4j019x" data-testid="Question Text" style="--t4j019x-0:auto">'
+                            + '               <div class="t1gujtze c1sj1twu">'
+                            + '                  <div aria-label="A web page and its content exist as a single file" class="FormattedText notranslate FormattedTextWithImage-wrapper lang-en">'
+                            + '                     <div style="display:inline-block">' + data.description + '</div>'
+                            + '                  </div>'
+                            + '               </div>'
+                            + '            </div>'
+                            + '            <div class="hideBelow--s"></div>'
+                            + '         </div>'
+                            + '         <div class="ag1fjc">'
+                            + '            <section aria-label="Choose The Correct Answer" class="l16m64a6">'
+                            + '               <div aria-hidden="true" class="m1crz3gf" data-testid="multiple-choice-answer-label">Choose The Correct Answer</div>'
+                            + '            </section>'
+                            + '            <div class="ajefojz" data-testid="MCQ Answers">';
 
                         var listans = [];
                         data.answers.forEach(ans => {
                             // swjz05g
                             listans.push(ans.answerno);
                             sec +=
-                                '               <section class="w1uwrq7e " tabindex="0" id="' + data.questionno +'ans'+ ans.answerno + '" onclick=selectAns(' + data.questionno +','+ ans.answerno + ')>'
+                                '               <section class="w1uwrq7e " tabindex="0" id="' + data.questionno + 'ans' + ans.answerno + '" onclick=selectAns(' + data.questionno + ',' + ans.answerno + ')>'
                                 + '                  <div></div>'
                                 + '                  <div aria-selected="false" class="t1d08860" data-testid="option-1">'
                                 + '                     <div class="c1sj1twu">'
@@ -247,18 +251,25 @@ For more information on enabling MVC for empty projects, visit https://go.micros
                                 + '                     </div>'
                                 + '                  </div>'
                                 + '               </section>'
-                            });
+                        });
                         //add list all ans for a ques
                         localStorage.setItem('listAns' + data.questionno, listans);
-                            sec +=
-                                '            </div>'
-                                + '         </div>'
-                                + '      </article>'
-                                + '   </div>'
-                                + '</div>';
+                        sec +=
+                            '            </div>'
+                            + '         </div>'
+                            + '      </article>'
+                            + '   </div>'
+                            + '</div>';
 
                         list.innerHTML += sec;
                     });
+                }
+                else {
+                    var mes = document.getElementById("ResultMessage");
+                    mes.innerHTML = "This Subject Has No Question! </br> Do Test Later";
+                    showPopup();
+                    goHome = 1;
+                    return;
                 }
             }
         })
@@ -266,8 +277,11 @@ For more information on enabling MVC for empty projects, visit https://go.micros
     LoadQuestion();
 
     function QuitExam() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get("id");
         localStorage.clear();
-        window.history.back();
+        localStorage.setItem("User", '@User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value');
+        window.location.href = 'http://localhost:5204/Subjects/SubjectCard?id=' + id;
     }
 
     function selectAns(quesno, ansno){
@@ -326,10 +340,11 @@ For more information on enabling MVC for empty projects, visit https://go.micros
             data: JSON.stringify(localData),
             contentType: 'application/json',
             success: res => {
-                if (res.message = 'OK') {
+                if (res.message == 'OK') {
                     var mes = document.getElementById("ResultMessage");
                     mes.innerHTML = "CONGRATULATION! You Did Great. <br>You Point Is " + res.data.correct + "/" + res.data.question;
                     showPopup();
+                    goHome = 1;
                 }
             },
             error: err => {
@@ -344,6 +359,11 @@ For more information on enabling MVC for empty projects, visit https://go.micros
 
     function hidePopup() {
         document.getElementById("popup").style.display = "none";
+        if(goHome == 1){
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get("id");
+            window.location.href = 'http://localhost:5204/Subjects/SubjectCard?id=' + id;
+        }
     }
 </script>
 

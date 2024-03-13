@@ -186,41 +186,12 @@
                 </header>
                 <div class="panel-body">
                     <ul class="nav prod-cat" id="categoryList">
-                        <li>
-                            <a href="#" class="active"><i class="fa fa-angle-right"></i> Dress</a>
-                            <ul class="nav">
-                                <li class="active"><a href="#">- Shirt</a></li>
-                                <li><a href="#">- Pant</a></li>
-                                <li><a href="#">- Shoes</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="#"><i class="fa fa-angle-right"></i> Bags &amp; Purses</a>
-                        </li>
                     </ul>
                 </div>
             </section>
         </div>
         <div class="col-md-9">
             <div class="row product-list" id="ListSubject">
-                <div class="col-md-4">
-                    <section class="panel">
-                        <div class="pro-img-box">
-                            <img src="https://www.bootdey.com/image/250x220/FFB6C1/000000" alt />
-                            <a href="#" class="adtocart">
-                                <i class="fa"></i>
-                            </a>
-                        </div>
-                        <div class="panel-body text-center">
-                            <h4>
-                                <a href="#" class="pro-title">
-                                    Leopard Shirt Dress
-                                </a>
-                            </h4>
-                            <p class="price">$300.00</p>
-                        </div>
-                    </section>
-                </div>
             </div>
         </div>
     </div>
@@ -283,7 +254,7 @@
                                 + '        </div>'
                                 + '        <div class="panel-body text-center">'
                                 + '            <h4>'
-                                + '                <a href="#" class="pro-title">'
+                                + '                <a href="http://localhost:5204/Subjects/SubjectCard?id='+ sub.subjectno + '" class="pro-title">'
                                 +                       sub.description.substring(0, 20)
                                 + '                </a>'
                                 + '            </h4>'

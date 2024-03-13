@@ -26,5 +26,6 @@
         public static string LoginOk = "Login Successfully";
         public static string LoginFail = "Your User Name Or Password might wrong";
         public static string ConfirmPassFail = "Your Confirm Password has wrong";
+        public static string RequestEnroll = "Your Have To Enroll Subject";
     }
 }

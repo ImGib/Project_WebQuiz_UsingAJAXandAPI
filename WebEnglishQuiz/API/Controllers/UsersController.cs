@@ -3,11 +3,9 @@ using API.Common.DTOs.UserDTO;
 using API.JWTAuth;
 using API.Models;
 using AutoMapper;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static API.Common.Utility;
 using static API.Common.Variables;
 using static API.JWTAuth.JwtAuthConfig;
 
@@ -27,9 +25,7 @@ namespace API.Controllers
             _config = configuration;
         }
 
-        // GET: api/Users
         [HttpGet]
-        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<UserDisplay>>> GetUsers()
         {
             if (_context.Users == null)
@@ -37,10 +33,31 @@ namespace API.Controllers
                 return NotFound();
             }
             List<User> rs = await _context.Users.ToListAsync();
-            return Ok(new Utility.ResponseStatus(message: ResponseOk, data: _mapper.Map<List<UserDisplay>>(rs)));
+            return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<List<UserDisplay>>(rs)));
         }
 
-        // GET: api/Users/5
+        [HttpGet("Dashboard/User")]
+        public async Task<ActionResult> DashboardNumberUser()
+        {
+            if (_context.Users == null)
+            {
+                return NotFound();
+            }
+
+            //get Users
+            int numberUser = _context.Users.Count();
+
+            //Get Top 5 Enroll users with the most subjects
+            var result = _context.Users.Include(p => p.Subjectnos)
+                            .OrderByDescending(t => t.Subjectnos.Count())
+                            .Take(5).ToList();
+
+            return Ok(new ResponseStatus(message: ResponseOk, data: new
+            {
+                Users = numberUser,
+                Top = _mapper.Map<List<UserDisplay>>(result)
+            }));
+        }
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDisplay>> GetUser(string id)
         {
@@ -54,7 +71,101 @@ namespace API.Controllers
             {
                 return NotFound();
             }
-            return Ok(new Utility.ResponseStatus(message: ResponseOk, data: _mapper.Map<UserDisplay>(user)));
+            return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<UserDisplay>(user)));
+        }
+        [HttpGet("Profile/{username}")]
+        public async Task<ActionResult<UserProfile>> Profile(string username)
+        {
+            UserProfile userProfile = new UserProfile();
+            try
+            {
+                if (username == null)
+                {
+                    throw new Exception();
+                }
+
+                username = username.ToUpper().Trim();
+
+                var user = await _context.Users.Include(p => p.Subjectnos).SingleOrDefaultAsync(p => p.Username.ToUpper().Trim().Equals(username));
+
+                if (user == null)
+                {
+                    throw new Exception();
+                }
+
+                //set profile
+                userProfile.Username = username;
+                userProfile.Email = user.Email;
+                userProfile.FirstName = user.FirstName;
+                userProfile.LastName = user.LastName;
+                userProfile.Phonenumber = user.Phonenumber;
+                userProfile.EnrollNum = user.Subjectnos.Count;
+
+                //get most tested subject 
+                List<MostSubjectTest> subquery = _context.Histories
+                    .GroupBy(t => new { t.Username, t.Subjectno })
+                    .Select(g => new MostSubjectTest
+                    {
+                        username = g.Key.Username,
+                        subject = g.Key.Subjectno,
+                        times = g.Select(t => t.Testno).Distinct().Count()
+                    }).ToList();
+
+                var result = subquery
+                    .GroupBy(t => t.username)
+                    .Select(g => new
+                    {
+                        Group = g,
+                        MaxTestCount = g.Max(t => t.times)
+                    })
+                    .SelectMany(g => g.Group.Where(t => t.times == g.MaxTestCount))
+                    .ToList();
+
+                var fn = result.SingleOrDefault(p => p.username.ToUpper().Trim().Equals(username));
+
+                if (fn == null)
+                {
+                    userProfile.MostSubject = "HAVE NOT ENROLL QUIZ";
+                }
+                else
+                {
+                    var sub = await _context.Subjects.FindAsync(fn.subject);
+
+                    userProfile.MostSubject = sub.Title;
+                }
+            }
+            catch
+            {
+                return Ok(new ResponseStatus(ResponseError));
+            }
+
+            return Ok(new ResponseStatus(message: ResponseOk, userProfile));
+        }
+
+        [HttpGet("CheckEnroll/{Username}/{Subjectno}")]
+        public async Task<ActionResult<UserDisplay>> CheckEnroll(string Username, int Subjectno)
+        {
+            if (_context.Users == null)
+            {
+                return NotFound();
+            }
+
+            Username = Username.ToUpper().Trim();
+
+            User? user = await _context.Users.Include(p => p.Subjectnos).SingleOrDefaultAsync(p => p.Username.ToUpper().Trim().Equals(Username));
+
+            if (user == null)
+            {
+                return Ok(new ResponseStatus(RequestEnroll));
+            }
+
+            foreach (Subject sub in user.Subjectnos)
+            {
+                if (sub.Subjectno == Subjectno)
+                    return Ok(new ResponseStatus(ResponseOk));
+            }
+
+            return Ok(new ResponseStatus(RequestEnroll));
         }
         [HttpPost("login")]
         public async Task<ActionResult<UserDisplay>> Login(UserLogin data)
@@ -64,25 +175,23 @@ namespace API.Controllers
                                                                     && p.Status == true); //Account enable
             if (user == null)
             {
-                return Ok(new Utility.ResponseStatus(message: LoginFail));
+                return Ok(new ResponseStatus(message: LoginFail));
             }
 
             JwtResponse token = CreateToken(_config, user);
-            return Ok(new Utility.ResponseStatus(message: LoginOk, token));
+            return Ok(new ResponseStatus(message: LoginOk, token));
         }
-
-        // PUT: api/Users/5
         [HttpPut("changepassword")]
         public async Task<IActionResult> Changepassword(UserChangepassword data)
         {
             if (!UserExists(data.UserName))
             {
-                return NotFound(new Utility.ResponseStatus(message: UserNotExisted));
+                return NotFound(new ResponseStatus(message: UserNotExisted));
             }
 
             if (!ConfirmPassword(data.Password, data.ConfirmPassword))
             {
-                return NotFound(new Utility.ResponseStatus(message: ConfirmPassFail));
+                return NotFound(new ResponseStatus(message: ConfirmPassFail));
             }
 
             User? user = await _context.Users.FindAsync(data.UserName);
@@ -95,12 +204,11 @@ namespace API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                return Ok(new Utility.ResponseStatus(message: ResponseError));
+                return Ok(new ResponseStatus(message: ResponseError));
             }
 
-            return Ok(new Utility.ResponseStatus(message: ResponseOk, data: _mapper.Map<UserDisplay>(user)));
+            return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<UserDisplay>(user)));
         }
-
         [HttpPost("register")]
         public async Task<ActionResult<UserDisplay>> PostUser(UserRegister user)
         {
@@ -113,11 +221,11 @@ namespace API.Controllers
 
             if (EmailExits(user.Email))
             {
-                return Ok(new Utility.ResponseStatus(message: EmailExisted, data: _mapper.Map<UserDisplay>(ur)));
+                return Ok(new ResponseStatus(message: EmailExisted, data: _mapper.Map<UserDisplay>(ur)));
             }
             if (PhoneNumberExits(user.Phonenumber))
             {
-                return Ok(new Utility.ResponseStatus(message: PhoneNumberExisted, data: _mapper.Map<UserDisplay>(ur)));
+                return Ok(new ResponseStatus(message: PhoneNumberExisted, data: _mapper.Map<UserDisplay>(ur)));
             }
 
             _context.Users.Add(ur);
@@ -129,7 +237,7 @@ namespace API.Controllers
             {
                 if (UserExists(user.Username))
                 {
-                    return Conflict(new Utility.ResponseStatus(message: UserExisted, data: _mapper.Map<UserDisplay>(ur)));
+                    return Conflict(new ResponseStatus(message: UserExisted, data: _mapper.Map<UserDisplay>(ur)));
                 }
                 else
                 {
@@ -137,7 +245,7 @@ namespace API.Controllers
                 }
             }
 
-            return Ok(new Utility.ResponseStatus(message: ResgisterOk, data: _mapper.Map<UserDisplay>(ur)));
+            return Ok(new ResponseStatus(message: ResgisterOk, data: _mapper.Map<UserDisplay>(ur)));
         }
         [HttpPut("adminUpdate")]
         public async Task<ActionResult> AdminUpUser(UserUpdateBaseBase data)
@@ -149,9 +257,9 @@ namespace API.Controllers
 
             User? user = await _context.Users.FindAsync(data.Username);
 
-            if(user == null)
+            if (user == null)
             {
-                return Ok(new Utility.ResponseStatus(message: "Update User Fail", data: _mapper.Map<UserDisplay>(data)));
+                return Ok(new ResponseStatus(message: "Update User Fail", data: _mapper.Map<UserDisplay>(data)));
             }
 
             user.Status = data.Status;
@@ -159,40 +267,45 @@ namespace API.Controllers
             try
             {
                 await _context.SaveChangesAsync();
-            } catch
+            }
+            catch
             {
-                return Ok(new Utility.ResponseStatus(message: ResponseError, data: _mapper.Map<UserDisplay>(data)));
+                return Ok(new ResponseStatus(message: ResponseError, data: _mapper.Map<UserDisplay>(data)));
             }
 
-            return Ok(new Utility.ResponseStatus(message: ResponseOk, data: _mapper.Map<UserDisplay>(user)));
+            return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<UserDisplay>(user)));
         }
+        [HttpPut("Enroll/{username}/{subjectno}")]
+        public async Task<ActionResult> Enroll(string username, int subjectno)
+        {
+            if (_context.Users == null)
+            {
+                return Ok(new ResponseStatus(ResponseError));
+            }
+            username = username.ToUpper().Trim();
+            User? user = await _context.Users.Include(p => p.Subjectnos).SingleOrDefaultAsync(p => p.Username.ToUpper().Trim().Equals(username));
+            if (user == null)
+            {
+                return Ok(new ResponseStatus(ResponseError));
+            }
+            Subject? sub = await _context.Subjects.FindAsync(subjectno);
+            if (sub == null)
+            {
+                return Ok(new ResponseStatus(ResponseError));
+            }
+            try
+            {
+                user.Subjectnos.Add(sub);
 
-        //[HttpGet("Logout/{username}")]
-        //public async Task<ActionResult<UserDisplay>> Logout(string username)
-        //{
-        //    await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        //    return Ok(new Utility.ResponseStatus(message: ResponseOk));
-        //}
-        //// DELETE: api/Users/5
-        //[HttpDelete("{id}")]
-        ////[Authorize(Roles = "Admin")]
-        //public async Task<IActionResult> DeleteUser(string id)
-        //{
-        //    if (_context.Users == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    var user = await _context.Users.FindAsync(id);
-        //    if (user == null)
-        //    {
-        //        return NotFound();
-        //    }
+                await _context.SaveChangesAsync();
+            }
+            catch
+            {
+                return Ok(new ResponseStatus(ResponseError));
+            }
 
-        //    _context.Users.Remove(user);
-        //    await _context.SaveChangesAsync();
-
-        //    return NoContent();
-        //}
+            return Ok(new ResponseStatus(ResponseOk));
+        }
 
         private bool UserExists(string id)
         {

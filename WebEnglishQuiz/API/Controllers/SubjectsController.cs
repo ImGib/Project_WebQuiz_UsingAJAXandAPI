@@ -31,7 +31,102 @@ namespace API.Controllers
             List<Subject> list = await _context.Subjects.Include(p => p.CategorynoNavigation).ToListAsync();
             return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<List<SubjectResponse>>(list)));
         }
+        [HttpGet("Dashboard/Subject")]
+        public async Task<ActionResult<int>> NumberSubject()
+        {
+            if (_context.Subjects == null)
+            {
+                return Ok(new ResponseStatus(ResponseError));
+            }
 
+            try
+            {
+
+                //Number of subject
+                int subjects = _context.Subjects.Count();
+
+                List<SubjectDashboard> subDash = new List<SubjectDashboard>();
+
+                //Get Top 5 subjects with the highest number of enrollees
+                List<Subject> listbase = _context.Subjects.Include(p => p.Usernames)
+                                        .OrderByDescending(t => t.Usernames.Count())
+                                        .Take(5).ToList();
+
+                //list quizzes
+                List<UserQuizList> quizListBase = _context.Histories
+                                .Select(h => new UserQuizList
+                                {
+                                    Username = h.Username,
+                                    Subjectno = h.Subjectno,
+                                    Testno = h.Testno
+                                })
+                                .Distinct().ToList();
+
+                foreach (Subject subject in listbase)
+                {
+                    SubjectDashboard subjectDashboard = new SubjectDashboard();
+                    subjectDashboard.Name = subject.Title;
+                    subjectDashboard.Enroll = subject.Usernames.Count;
+
+                    //get own quizzes
+                    List<UserQuizList> ownQuiz = quizListBase.Where(p => p.Subjectno == subject.Subjectno).ToList();
+                    //count number quizz that has been created
+                    subjectDashboard.QuizNum = ownQuiz.Count();
+
+                    //number of question
+                    subjectDashboard.QuestionNum = _context.Questions.Where(p => p.Subjectno == subject.Subjectno).Count();
+                    if (subjectDashboard.QuestionNum > 0)
+                    {
+                        //Passing percentage
+                        int percen = 0;
+                        //count number of quizz that have pass more than 50%
+                        foreach (UserQuizList quizz in ownQuiz)
+                        {
+                            //get all question for each quiz
+                            List<History> histories = _context.Histories
+                                .Where(p => p.Username.ToUpper().Trim().Equals(quizz.Username.ToUpper().Trim())
+                                && p.Subjectno == quizz.Subjectno
+                                && p.Testno == quizz.Testno
+                                )
+                                .ToList();
+
+                            int number = 0;
+                            //count number of correct each quizz
+                            foreach (History history in histories)
+                            {
+                                //check asnwer is  correct or not
+                                Answer? ans = await _context.Answers.FindAsync(history.Answerno);
+                                if (ans == null) continue;
+                                //if ans is correct than plus number of correct
+                                if (ans.Iscorect)
+                                {
+                                    number++;
+                                }
+                            }
+                            //if the number of correct greater than or equal 50% than this quizz is pass
+                            if (number / histories.Count * 100 >= 0.5) percen++;
+                        }
+
+                        subjectDashboard.PassingPercentage = (int)((double)percen / (double)subjectDashboard.QuestionNum * 100);
+                    }
+                    else
+                    {
+                        subjectDashboard.QuestionNum = 0;
+                        subjectDashboard.PassingPercentage = 0;
+                    }
+                    subDash.Add(subjectDashboard);
+                }
+                return Ok(new ResponseStatus(ResponseOk, new
+                {
+                    NoSubject = subjects,
+                    sublist = subDash
+                }));
+            }
+            catch
+            {
+                return Ok(new ResponseStatus(ResponseError));
+            }
+        }
         [HttpGet("Public")]
         public async Task<ActionResult<IEnumerable<SubjectResponse>>> PublicSubjects()
         {
@@ -50,7 +145,7 @@ namespace API.Controllers
                 return NotFound();
             }
             word = word.ToUpper().Trim();
-            List<Subject> list = _context.Subjects.Include(p => p.CategorynoNavigation).Where(p => p.Status == true && 
+            List<Subject> list = _context.Subjects.Include(p => p.CategorynoNavigation).Where(p => p.Status == true &&
                                                             (p.Description.ToUpper().Trim().Contains(word)
                                                             || p.Title.ToUpper().Trim().Contains(word)))
                 .ToList();

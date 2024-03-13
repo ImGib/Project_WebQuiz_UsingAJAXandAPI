@@ -20,10 +20,30 @@
                 Message = message;
             }
         }
+        public class MostSubjectTest
+        {
+            public string username { get; set; }
+            public int subject { get; set; }
+            public int times { get; set; }
+        }
         public class CorrectAnswer
         {
             public int Correct { get; set; }
             public int Question { get; set; }
+        }
+        public class UserQuizList
+        {
+            public string Username { get; set; }
+            public int Subjectno { get; set; }
+            public int Testno { get; set; }
+        }
+        public class SubjectDashboard
+        {
+            public string Name { get; set; }
+            public int Enroll { get; set; }
+            public int QuizNum { get; set; }
+            public int QuestionNum { get; set; }
+            public int PassingPercentage { get; set; }
         }
         public static bool Compare(string a, string b)
         {

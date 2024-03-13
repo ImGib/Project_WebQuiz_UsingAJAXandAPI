@@ -32,6 +32,68 @@ namespace API.Controllers
             }
             return await _context.Histories.ToListAsync();
         }
+        [HttpGet("Dashboard/History")]
+        public async Task<ActionResult<DashboardHistory>> DashboardHistory()
+        {
+            if (_context.Histories == null)
+            {
+                return NotFound();
+            }
+            try
+            {
+                //list quizzes
+                List<UserQuizList> quizList = _context.Histories
+                                .Select(h => new UserQuizList
+                                {
+                                    Username = h.Username,
+                                    Subjectno = h.Subjectno,
+                                    Testno = h.Testno
+                                })
+                                .Distinct().ToList();
+
+                //number quizzes
+                int quizzes = quizList.Count();
+
+                int perce = 0;
+                //count number of quizz that have pass more than 50%
+                foreach (UserQuizList quizz in quizList)
+                {
+                    //get all question for each quiz
+                    List<History> histories = _context.Histories
+                        .Where(p => p.Username.ToUpper().Trim().Equals(quizz.Username.ToUpper().Trim())
+                        && p.Subjectno == quizz.Subjectno
+                        && p.Testno == quizz.Testno
+                        )
+                        .ToList();
+
+                    int number = 0;
+                    //count number of correct each quizz
+                    foreach (History history in histories)
+                    {
+                        //check asnwer is  correct or not
+                        Answer? ans = await _context.Answers.FindAsync(history.Answerno);
+                        if (ans == null) continue;
+                        //if ans is correct than plus number of correct
+                        if (ans.Iscorect)
+                        {
+                            number++;
+                        }
+                    }
+                    //if the number of correct greater than or equal 50% than this quizz is pass
+                    if (number / histories.Count * 100 >= 0.5) perce++;
+                }
+
+                return Ok(new ResponseStatus(ResponseOk, new DashboardHistory
+                {
+                    Quizzes = quizzes,
+                    PassingPercentage = (int)((double)perce / (double)quizzes * 100),
+                }));
+            }
+            catch
+            {
+                return Ok();
+            }
+        }
 
         // GET: api/Histories/5
         [HttpGet("{id}")]

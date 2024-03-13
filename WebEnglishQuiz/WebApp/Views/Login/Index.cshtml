@@ -1,4 +1,5 @@
-﻿@{
+﻿@using System.Security.Claims;
+@{
 	Layout = null;
 }
 
@@ -64,7 +65,10 @@
 			data: JSON.stringify(formdata),
 			success: response => {
 				if (response.message == 'Login Successfully')
-					window.location.href = '/Home'
+				{
+					localStorage.setItem("User", document.getElementById('username').value);
+					window.location.href = '/Home';
+				}
 				else {
 					console.log("false");
 					alert(response.message);

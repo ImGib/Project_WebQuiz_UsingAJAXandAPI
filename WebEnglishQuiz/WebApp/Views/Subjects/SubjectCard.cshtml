@@ -1,0 +1,130 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<link href="~/css/subjectcard.css" rel="stylesheet"/>
+
+<div class="wrapper">
+	<div class="outer">
+		<div class="content animated fadeInLeft">
+			<span class="bg animated fadeInDown" id="cateSub">EXCLUSIVE</span>
+			<h1 id="title"></h1>
+			<p id="descriptionSub">Shadow your real allegiance to New York's Pirate radio with this cool cap featuring the Graphic Know Wave logo.</p>
+
+			<div class="button">
+				<a>HI</a><a class="cart-btn" id="EnrollNow">
+				<i class="cart-icon ion-bag"></i>Enroll Subject To Go Quiz</a>
+			</div>
+		</div>
+		<img width="300px" class="animated fadeInRight" id="myImage">
+	</div>
+</div>
+
+<script>
+	function loadSubject() {
+		const urlParams = new URLSearchParams(window.location.search);
+		const id = urlParams.get("id");
+
+		const username = localStorage.getItem("User");
+
+		$.ajax({
+			url: 'http://localhost:5020/api/Subjects/' + id,
+			method:'GET',
+			contentType:'application/json',
+			success: res => {
+				if (res.message == 'OK') {
+					var a = document.getElementById("title");
+					a.innerHTML = res.data.title;
+
+					var a = document.getElementById("descriptionSub");
+					a.innerHTML = res.data.description;
+
+					var a = document.getElementById("cateSub");
+					a.innerHTML = res.data.categorynoNavigation.title;
+
+					const imgElement = document.getElementById("myImage");
+					imgElement.src = res.data.image;
+					
+					if (username.trim() == '') {
+						requestEnroll(id);
+						return;
+					}
+					CreateEventEnrollQuiz(id);
+				}
+			},
+			error: err => {
+				console.log(err.message);
+			}
+		}) 
+	};
+
+	loadSubject();
+
+	function CreateEventEnrollQuiz(subno) {
+		const username = localStorage.getItem("User");
+		
+		if (username.trim() == '') {
+			alert("You have to login to enroll quiz");
+			return;
+		}
+		$.ajax({
+			url: 'http://localhost:5020/api/Users/CheckEnroll/' + username + '/' + subno,
+			method: 'GET',
+			contentType: 'application/json',
+			success: res => {
+				if (res.message == 'OK') {
+					console.log('http://localhost:5020/api/Users/CheckEnroll/' + username + '/' + subno);
+					setGotoQuiz(subno);
+				} else {
+					console.log("request");
+					requestEnroll(subno);
+				}
+			}
+		})
+	}
+
+	function EnrollQuiz(subno) {
+		const username = localStorage.getItem("User");
+		if (username.trim() == '') {
+			alert("You have to login to enroll quiz");
+			return;
+		}
+		$.ajax({
+			url: 'http://localhost:5020/api/Users/Enroll/' + username + '/' + subno,
+			method: 'PUT',
+			contentType: 'application/json',
+			success: res => {
+				if (res.message == 'OK') {
+					setGotoQuiz(subno);
+				}
+			}
+		})
+	}
+
+	function requestEnroll(subno) {
+		var myLink = document.getElementById("EnrollNow");
+		myLink.innerHTML = "Enroll Subject To Go Quiz";
+
+		myLink.addEventListener("click", function (event) {
+			event.preventDefault(); // Prevents the default behavior of the link (e.g., navigating to a new page)
+			//Event Enroll Quiz
+			EnrollQuiz(subno);
+		});
+	}
+
+	function setGotoQuiz(subno) {
+		var myLink = document.getElementById("EnrollNow");
+		myLink.innerHTML = "Go To Quiz Now";
+
+		myLink.removeEventListener("click", EnrollQuiz);
+
+		myLink.addEventListener("click", function (event) {
+			event.preventDefault(); // Prevents the default behavior of the link (e.g., navigating to a new page)
+			//goto quiz
+			window.location.href = 'http://localhost:5204/Exam?id=' + subno;
+		});
+	}
+
+
+</script>
