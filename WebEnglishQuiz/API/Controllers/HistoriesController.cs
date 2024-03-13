@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using API.Common;
+using API.Common.DTOs.AnswerDTO;
+using API.Common.DTOs.HistoryDTO;
+using API.Models;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using API.Models;
-using Microsoft.AspNetCore.Authorization;
+using static API.Common.Utility;
+using static API.Common.Variables;
 
 namespace API.Controllers
 {
@@ -15,20 +15,21 @@ namespace API.Controllers
     public class HistoriesController : ControllerBase
     {
         private readonly QuizAPIContext _context;
-
-        public HistoriesController(QuizAPIContext context)
+        private readonly IMapper _mapper;
+        public HistoriesController(QuizAPIContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/Histories
         [HttpGet]
         public async Task<ActionResult<IEnumerable<History>>> GetHistories()
         {
-          if (_context.Histories == null)
-          {
-              return NotFound();
-          }
+            if (_context.Histories == null)
+            {
+                return NotFound();
+            }
             return await _context.Histories.ToListAsync();
         }
 
@@ -36,10 +37,10 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<History>> GetHistory(int id)
         {
-          if (_context.Histories == null)
-          {
-              return NotFound();
-          }
+            if (_context.Histories == null)
+            {
+                return NotFound();
+            }
             var history = await _context.Histories.FindAsync(id);
 
             if (history == null)
@@ -51,7 +52,7 @@ namespace API.Controllers
         }
 
         // PUT: api/Histories/5
-        
+
         [HttpPut("{id}")]
         //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutHistory(int id, History history)
@@ -83,33 +84,88 @@ namespace API.Controllers
         }
 
         // POST: api/Histories
-        
+
         [HttpPost]
         //[Authorize(Roles = "Admin")]
-        public async Task<ActionResult<History>> PostHistory(History history)
+        public async Task<ActionResult<ResponseStatus>> PostHistory(HistoryRequestBase data)
         {
-          if (_context.Histories == null)
-          {
-              return Problem("Entity set 'QuizAPIContext.Histories'  is null.");
-          }
-            _context.Histories.Add(history);
-            try
+            if (_context.Histories == null)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (HistoryExists(history.Htrno))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
+                return Ok(new ResponseStatus(ResponseError));
             }
 
-            return CreatedAtAction("GetHistory", new { id = history.Htrno }, history);
+            if (data == null || data.UserName == null || data.answerList == null)
+            {
+                return Ok(new ResponseStatus(ResponseError));
+            }
+
+            //get test no max
+            int testno = 0;
+            var alluser = _context.Histories.GroupBy(p => p.Username)
+                        .Select(group => new
+                        {
+                            UserName = group.Key,
+                            TestNo = group.Max(row => row.Testno)
+                        });
+            try
+            {
+                testno = alluser.Where(p => p.UserName.ToUpper().Trim().Equals(data.UserName.ToUpper().Trim()))
+                        .Select(p => p.TestNo).FirstOrDefault();
+            }
+            catch
+            {
+                return Ok(new ResponseStatus("Get test no fail"));
+            }
+
+            testno++;
+
+            string[] anslist = data.answerList.Split(",");
+
+            //number correct ans
+            int correct = 0;
+            try
+            {
+
+                //add data
+                foreach (string id in anslist)
+                {
+                    int ansno = int.Parse(id);
+
+                    //find question no
+                    Answer? answer = _context.Answers.Find(ansno);
+
+                    if (answer == null)
+                    {
+                        return Ok(new ResponseStatus(ResponseError, _mapper.Map<AnswerResponse>(answer)));
+                    }
+
+                    int quesno = answer.Questionno;
+                    //check correct
+                    correct = correct + (answer.Iscorect ? 1 : 0);
+
+                    //add data
+                    _context.Histories.Add(new History
+                    {
+                        Username = data.UserName,
+                        Testno = testno,
+                        Answerno = ansno,
+                        Questionno = quesno,
+                        Subjectno = data.SubjectNo
+                    });
+                }
+                //save data added
+                await _context.SaveChangesAsync();
+            }
+            catch
+            {
+                return Ok(new ResponseStatus(ResponseError));
+            }
+
+            return Ok(new ResponseStatus(ResponseOk, new Utility.CorrectAnswer
+            {
+                Correct = correct,
+                Question = anslist.Length
+            }));
         }
 
         // DELETE: api/Histories/5

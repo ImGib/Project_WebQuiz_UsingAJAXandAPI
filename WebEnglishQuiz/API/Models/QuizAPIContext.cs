@@ -23,6 +23,15 @@ namespace API.Models
         public virtual DbSet<Subject> Subjects { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS;Initial Catalog=QuizAPI; User ID=sa;Password=giabao5102;Encrypt=false;TrustServerCertificate=true");
+            }
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Answer>(entity =>
@@ -78,9 +87,7 @@ namespace API.Models
 
                 entity.ToTable("HISTORY");
 
-                entity.Property(e => e.Htrno)
-                    .ValueGeneratedNever()
-                    .HasColumnName("HTRNO");
+                entity.Property(e => e.Htrno).HasColumnName("HTRNO");
 
                 entity.Property(e => e.Answerno).HasColumnName("ANSWERNO");
 
@@ -88,9 +95,7 @@ namespace API.Models
 
                 entity.Property(e => e.Subjectno).HasColumnName("SUBJECTNO");
 
-                entity.Property(e => e.Testno)
-                    .ValueGeneratedOnAdd()
-                    .HasColumnName("TESTNO");
+                entity.Property(e => e.Testno).HasColumnName("TESTNO");
 
                 entity.Property(e => e.Username)
                     .HasMaxLength(20)

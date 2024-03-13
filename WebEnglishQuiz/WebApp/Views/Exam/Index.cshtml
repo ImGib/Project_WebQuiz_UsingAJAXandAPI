@@ -1,4 +1,5 @@
-﻿@*
+﻿@using System.Security.Claims;
+@*
 For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
@@ -112,6 +113,9 @@ For more information on enabling MVC for empty projects, visit https://go.micros
         const urlParams = new URLSearchParams(window.location.search);
         const id = '1';
         // const id = urlParams.get("id");
+
+        localStorage.setItem("SubjectNO", id);
+        localStorage.setItem("User", '@User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value');
 
         $.ajax({
             url: 'http://localhost:5020/api/Subjects/' + id,
@@ -247,6 +251,23 @@ For more information on enabling MVC for empty projects, visit https://go.micros
     }
 
     function submitexam(){
+        var localData = {
+            userName: localStorage.getItem("User"),
+            subjectNo: localStorage.getItem("SubjectNO"),
+            answerList: localStorage.getItem("ResultAns")
+        };
 
+        $.ajax({
+            url: 'http://localhost:5020/api/Histories',
+            method:'POST',
+            data: JSON.stringify(localData),
+            contentType: 'application/json',
+            success: res => {
+                alert("Success");
+            },
+            error: err => {
+                console.log(err.message);
+            }
+        })
     }
 </script>

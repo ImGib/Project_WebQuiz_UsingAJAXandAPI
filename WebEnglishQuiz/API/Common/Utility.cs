@@ -20,6 +20,11 @@
                 Message = message;
             }
         }
+        public class CorrectAnswer
+        {
+            public int Correct { get; set; }
+            public int Question { get; set; }
+        }
         public static bool Compare(string a, string b)
         {
             a = a.ToLower().Trim();
