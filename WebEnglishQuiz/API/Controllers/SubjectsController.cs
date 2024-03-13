@@ -42,6 +42,30 @@ namespace API.Controllers
             List<Subject> list = _context.Subjects.Include(p => p.CategorynoNavigation).Where(p => p.Status == true).ToList();
             return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<List<SubjectResponse>>(list)));
         }
+        [HttpGet("Public/{word}")]
+        public async Task<ActionResult<IEnumerable<SubjectResponse>>> PublicSubjects(string word)
+        {
+            if (_context.Subjects == null)
+            {
+                return NotFound();
+            }
+            word = word.ToUpper().Trim();
+            List<Subject> list = _context.Subjects.Include(p => p.CategorynoNavigation).Where(p => p.Status == true && 
+                                                            (p.Description.ToUpper().Trim().Contains(word)
+                                                            || p.Title.ToUpper().Trim().Contains(word)))
+                .ToList();
+            return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<List<SubjectResponse>>(list)));
+        }
+        [HttpGet("Public/Category/{id}")]
+        public async Task<ActionResult<IEnumerable<SubjectResponse>>> PublicSubjectsByCategory(int id)
+        {
+            if (_context.Subjects == null)
+            {
+                return NotFound();
+            }
+            List<Subject> list = _context.Subjects.Include(p => p.CategorynoNavigation).Where(p => p.Status == true && p.Categoryno == id).ToList();
+            return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<List<SubjectResponse>>(list)));
+        }
 
         // GET: api/Subjects/5
         [HttpGet("{subjectno}")]
