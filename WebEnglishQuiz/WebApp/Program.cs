@@ -13,7 +13,7 @@ namespace WebApp
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
-                    options.ExpireTimeSpan = TimeSpan.FromMinutes(400);
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                     options.SlidingExpiration = true;
                     options.AccessDeniedPath = "/Forbidden";
                     options.LogoutPath = "/Logout";
