@@ -83,6 +83,12 @@
 
 <script>
     function UpdateUser(id) {
+        var Cr_user = localStorage.getItem("User");
+        if (Cr_user == id){
+            alert("You Can not Update Your Permission");
+            return;
+        }
+
         const role = document.getElementById('userRole' + id).value == "1" ? true : false;
         const status = document.getElementById('userSatatus' + id).value == "1" ? true : false;
 

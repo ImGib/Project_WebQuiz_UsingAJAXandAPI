@@ -53,8 +53,11 @@ namespace API.Controllers
                 return Ok(new ResponseStatus(message: ResponseError));
             }
 
-			//get list subject's questions
-			List<Question> dataList = await _context.Questions.Include(p=>p.Answers).Where(p => p.Subjectno ==  subjectid).ToListAsync();
+            Random random = new Random();
+
+            //get list subject's questions
+            List<Question> dataList = await _context.Questions.Include(p=>p.Answers).Where(p => p.Subjectno ==  subjectid).
+				ToListAsync();
 
 			if(dataList == null || dataList.Count <=0)
 			{
@@ -62,7 +65,6 @@ namespace API.Controllers
             }
 
             //get random 10 questions
-            Random random = new Random();
 			Question temp;
             // Fisher-Yates shuffle algorithm
             for (int i = dataList.Count - 1; i > 0; i--)

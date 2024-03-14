@@ -163,6 +163,14 @@ For more information on enabling MVC for empty projects, visit https://go.micros
 </body>
 
 <script>
+    document.addEventListener('keydown', function (event) {
+        var key = event.key || event.keyCode;
+
+        console.log(key);
+        if (key === 'F5' || key === 116) {
+            event.preventDefault();
+        }
+    });
     var goHome = 0;
 
     function LoadQuestion() {
@@ -238,6 +246,10 @@ For more information on enabling MVC for empty projects, visit https://go.micros
                             + '            </section>'
                             + '            <div class="ajefojz" data-testid="MCQ Answers">';
 
+                        for (let i = data.answers.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [data.answers[i], data.answers[j]] = [data.answers[j], data.answers[i]];
+                        }
                         var listans = [];
                         data.answers.forEach(ans => {
                             // swjz05g

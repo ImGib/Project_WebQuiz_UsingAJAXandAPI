@@ -1,4 +1,5 @@
 ﻿using API.Common;
+using API.Common.DTOs.SubjectDTO;
 using API.Common.DTOs.UserDTO;
 using API.JWTAuth;
 using API.Models;
@@ -166,6 +167,76 @@ namespace API.Controllers
             }
 
             return Ok(new ResponseStatus(RequestEnroll));
+        }
+        [HttpGet("GetSubjectEndroll/{Username}")]
+        public async Task<ActionResult<UserDisplay>> GetEnrolled(string Username)
+        {
+            if (_context.Users == null)
+            {
+                return NotFound();
+            }
+
+            Username = Username.ToUpper().Trim();
+
+            User? user = await _context.Users.Include(p => p.Subjectnos).SingleOrDefaultAsync(p => p.Username.ToUpper().Trim().Equals(Username));
+
+            if (user == null)
+            {
+                return Ok(new ResponseStatus(ResponseError));
+            }
+
+            List<SubjectResponseBase> list = _mapper.Map<List<SubjectResponseBase>>(user.Subjectnos);
+
+            return Ok(new ResponseStatus(ResponseOk, list));
+        }
+        [HttpGet("GetSubjectNotEndroll/{Username}")]
+        public async Task<ActionResult<UserDisplay>> GetNotEnrolled(string Username)
+        {
+            if (_context.Users == null)
+            {
+                return NotFound();
+            }
+
+            Username = Username.ToUpper().Trim();
+            try
+            {
+                User? user = await _context.Users.Include(p => p.Subjectnos).SingleOrDefaultAsync(p => p.Username.ToUpper().Trim().Equals(Username));
+
+                if (user == null)
+                {
+                    return Ok(new ResponseStatus(ResponseError));
+                }
+
+                List<Subject> subListbas = user.Subjectnos.ToList();
+
+                List<Subject> allsub = _context.Subjects.ToList();
+
+                int i = 0;
+                while(allsub .Count > 0) 
+                {
+                    if (subListbas == null || subListbas.Count <= 0)
+                    {
+                        return Ok(new ResponseStatus(ResponseOk, _mapper.Map<List<SubjectResponseBase>>(allsub)));
+                    }
+                    bool flg = true;
+                    foreach (Subject re in subListbas)
+                    {
+                        if (allsub[i].Subjectno == re.Subjectno)
+                        {
+                            allsub.Remove(allsub[i]);
+                            subListbas.Remove(re);
+                            flg = false;
+                            break;
+                        }
+                    }
+                    if (flg) i++;
+                }
+            } catch
+            {
+                return Ok(new ResponseStatus(ResponseError));
+            }
+
+            return Ok(new ResponseStatus(ResponseError));
         }
         [HttpPost("login")]
         public async Task<ActionResult<UserDisplay>> Login(UserLogin data)

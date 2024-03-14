@@ -218,7 +218,15 @@
 
                         list.innerHTML += '<li>'
                             + '<a onclick=getSubByCate(-1) > <i class="fa fa-angle-right" > </i> All </a>'
+                            + '</li>';
+
+                        list.innerHTML +=
+                            '<li>'
+                            + '<a onclick=getSubByCate(-2) > <i class="fa fa-angle-right" > </i> Enrolled </a>'
                             + '</li>'
+                            + '<li>'
+                            + '<a onclick=getSubByCate(-3) > <i class="fa fa-angle-right" > </i> Not Enroll </a>'
+                            + '</li>';;
                     }
                 },
                 error: err => {
@@ -279,6 +287,16 @@
                 return;
             }
 
+            if(id == '-2'){
+                getEnrollSubject();
+                return;
+            }
+
+            if (id == '-3') {
+                getNotEnroll();
+                return;
+            }
+
             $.ajax({
                 url: 'http://localhost:5020/api/Subjects/Public/Category/'+id,
                 method: 'GET',
@@ -321,6 +339,86 @@
             var word = document.getElementById("searchInput").value;
 
             getSubjectList(word.trim());
+        }
+
+        function getEnrollSubject() {
+            var user = localStorage.getItem("User");
+            $.ajax({
+                url: 'http://localhost:5020/api/Users/GetSubjectEndroll/' + user,
+                method: 'GET',
+                contentType: 'application/json',
+                success: response => {
+                    if (response.message == "OK") {
+                        console.log(response.data);
+
+                        const list = document.querySelector("#ListSubject");
+                        list.innerHTML = "";
+
+                        response.data.forEach(sub => {
+                            var item =
+                                '<div class="col-md-4">'
+                                + '    <section class="panel">'
+                                + '        <div class="pro-img-box">'
+                                + '            <img src="' + sub.image + '" alt  style="height: 250px;width: 250px;"/>'
+                                + '        </div>'
+                                + '        <div class="panel-body text-center">'
+                                + '            <h4>'
+                                + '                <a href="#" class="pro-title">'
+                                + sub.description.substring(0, 20)
+                                + '                </a>'
+                                + '            </h4>'
+                                + '            <p class="price">' + sub.title + '</p>'
+                                + '        </div>'
+                                + '    </section>'
+                                + '</div>';
+                            list.innerHTML += item;
+                        });
+                    };
+                },
+                error: error => {
+                    console.log(error.message);
+                }
+            })
+        }
+
+        function getNotEnroll() {
+            var user = localStorage.getItem("User");
+            $.ajax({
+                url: 'http://localhost:5020/api/Users/GetSubjectNotEndroll/' + user,
+                method: 'GET',
+                contentType: 'application/json',
+                success: response => {
+                    if (response.message == "OK") {
+                        console.log(response.data);
+
+                        const list = document.querySelector("#ListSubject");
+                        list.innerHTML = "";
+
+                        response.data.forEach(sub => {
+                            var item =
+                                '<div class="col-md-4">'
+                                + '    <section class="panel">'
+                                + '        <div class="pro-img-box">'
+                                + '            <img src="' + sub.image + '" alt  style="height: 250px;width: 250px;"/>'
+                                + '        </div>'
+                                + '        <div class="panel-body text-center">'
+                                + '            <h4>'
+                                + '                <a href="#" class="pro-title">'
+                                + sub.description.substring(0, 20)
+                                + '                </a>'
+                                + '            </h4>'
+                                + '            <p class="price">' + sub.title + '</p>'
+                                + '        </div>'
+                                + '    </section>'
+                                + '</div>';
+                            list.innerHTML += item;
+                        });
+                    };
+                },
+                error: error => {
+                    console.log(error.message);
+                }
+            })
         }
     </script>
 </body>

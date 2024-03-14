@@ -1,4 +1,5 @@
 ﻿using API.Common.DTOs.SubjectDTO;
+using API.Common.DTOs.UserDTO;
 using API.Models;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -137,6 +138,28 @@ namespace API.Controllers
             List<Subject> list = _context.Subjects.Include(p => p.CategorynoNavigation).Where(p => p.Status == true).ToList();
             return Ok(new ResponseStatus(message: ResponseOk, data: _mapper.Map<List<SubjectResponse>>(list)));
         }
+        //[HttpGet("GetSubjectNotEndroll/{Username}")]
+        //public async Task<ActionResult<SubjectResponseBase>> GetEnrolled(string Username)
+        //{
+        //    if (_context.Users == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    Username = Username.ToUpper().Trim();
+
+        //    User? user = await _context.Users.Include(p => p.Subjectnos).SingleOrDefaultAsync(p => p.Username.ToUpper().Trim().Equals(Username));
+
+        //    List<Subject>? list = _context.Subjects.Include(p=>p.Usernames).Where(p => p)
+        //    if (user == null)
+        //    {
+        //        return Ok(new ResponseStatus(ResponseError));
+        //    }
+
+        //    List<SubjectResponseBase> list = _mapper.Map<List<SubjectResponseBase>>(user.Subjectnos);
+
+        //    return Ok(new ResponseStatus(ResponseOk, list));
+        //}
         [HttpGet("Public/{word}")]
         public async Task<ActionResult<IEnumerable<SubjectResponse>>> PublicSubjects(string word)
         {
